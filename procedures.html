@@ -1,0 +1,246 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Procédures | Alienis SAHIN</title>
+    <meta name="description" content="Procédures techniques d'Alienis SAHIN — Classées par domaine : système, réseau, Docker, AD, sécurité.">
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <nav>
+        <div class="nav-container">
+            <a href="index.html" class="logo">alienis<span class="suffix">.sh</span></a>
+            <button class="hamburger" id="hamburger-btn" aria-label="Menu"><span></span><span></span><span></span></button>
+            <ul class="nav-links" id="nav-links">
+                <li><a href="index.html">accueil</a></li>
+                <li><a href="parcours.html">parcours</a></li>
+                <li><a href="competences.html">competences</a></li>
+                <li><a href="procedures.html" class="active">procedures</a></li>
+                <li><a href="projets.html">projets</a></li>
+                <li><a href="synthese-e5.html">synthèse E5</a></li>
+                <li><a href="contact.html">contact</a></li>
+            </ul>
+        </div>
+    </nav>
+    <div class="nav-overlay" id="nav-overlay"></div>
+
+    <main>
+        <div class="container">
+            <section class="section-header animate-in">
+                <span class="label">Knowledge base</span>
+                <h1>Procédures techniques</h1>
+                <p class="subtitle">
+                    Documentation des procédures réalisées en formation, classées par domaine
+                    technique. Chaque projet listé dans la section <a href="projets.html" style="color: var(--violet-light);">Projets</a> détaille une procédure complète de A à Z.
+                </p>
+            </section>
+
+            <!-- 01 — SYSTÈMES -->
+            <section class="theme-section animate-in delay-1">
+                <div class="theme-header">
+                    <h2 data-num="01."><span>🖥️</span> Systèmes</h2>
+                    <span class="count">4 procédures</span>
+                </div>
+                <div class="procedure-list">
+                    <div class="procedure-item">
+                        <span class="proc-type">Linux</span>
+                        <h4>Commandes Linux essentielles</h4>
+                        <p>Navigation, gestion fichiers, processus, utilisateurs et droits.</p>
+                    </div>
+                    <div class="procedure-item">
+                        <span class="proc-type">Linux</span>
+                        <h4>Installation &amp; configuration Debian</h4>
+                        <p>Mise en place d'une VM Debian, paramétrage réseau et utilisateurs.</p>
+                    </div>
+                    <div class="procedure-item">
+                        <span class="proc-type">Windows Server</span>
+                        <h4>Installation de Windows Server</h4>
+                        <p>Déploiement et configuration initiale d'un serveur Windows.</p>
+                    </div>
+                    <div class="procedure-item">
+                        <span class="proc-type">Linux</span>
+                        <h4>Gestion des clusters</h4>
+                        <p>Mise en place et administration d'un cluster Linux.</p>
+                    </div>
+                </div>
+            </section>
+
+            <!-- 02 — RÉSEAU -->
+            <section class="theme-section animate-in delay-2">
+                <div class="theme-header">
+                    <h2 data-num="02."><span>🌐</span> Réseau</h2>
+                    <span class="count">4 procédures</span>
+                </div>
+                <div class="procedure-list">
+                    <a href="projet-dhcp.html" class="procedure-item" style="text-decoration: none; color: inherit;">
+                        <span class="proc-type">Projet détaillé</span>
+                        <h4>Mise en place du DHCP IPv4</h4>
+                        <p>Configuration serveur DHCP Windows Server + postes clients.</p>
+                    </a>
+                    <div class="procedure-item">
+                        <span class="proc-type">DNS</span>
+                        <h4>Résolution DNS</h4>
+                        <p>Principe du DNS, conversion nom de domaine ↔ adresse IP.</p>
+                    </div>
+                    <div class="procedure-item">
+                        <span class="proc-type">Réseau</span>
+                        <h4>Adressage IP &amp; masques</h4>
+                        <p>Schémas d'adressage, translation de ports (NAT), sous-réseaux.</p>
+                    </div>
+                    <div class="procedure-item">
+                        <span class="proc-type">Bail DHCP</span>
+                        <h4>Réservation MAC via DHCP</h4>
+                        <p>Consultation d'adresse MAC et réservation d'adresse IP.</p>
+                    </div>
+                </div>
+            </section>
+
+            <!-- 03 — ACTIVE DIRECTORY & GPO -->
+            <section class="theme-section animate-in delay-3">
+                <div class="theme-header">
+                    <h2 data-num="03."><span>🏢</span> Active Directory &amp; GPO</h2>
+                    <span class="count">5 procédures</span>
+                </div>
+                <div class="procedure-list">
+                    <a href="projet-active-directory.html" class="procedure-item" style="text-decoration: none; color: inherit;">
+                        <span class="proc-type">Projet détaillé</span>
+                        <h4>Création d'un Active Directory</h4>
+                        <p>Installation AD DS, promotion contrôleur de domaine, ajout client.</p>
+                    </a>
+                    <a href="projet-societe-alienis.html" class="procedure-item" style="text-decoration: none; color: inherit;">
+                        <span class="proc-type">Projet détaillé</span>
+                        <h4>Infrastructure société complète</h4>
+                        <p>Domaine alienis.lan, OU, users, PC, GPO complètes.</p>
+                    </a>
+                    <div class="procedure-item">
+                        <span class="proc-type">GPO</span>
+                        <h4>GPO Autorité de certification</h4>
+                        <p>Déploiement d'une autorité de certification via GPO.</p>
+                    </div>
+                    <div class="procedure-item">
+                        <span class="proc-type">GPO</span>
+                        <h4>GPO Signature SMB</h4>
+                        <p>Chiffrement des communications entre clients et serveur.</p>
+                    </div>
+                    <div class="procedure-item">
+                        <span class="proc-type">GPO</span>
+                        <h4>GPO restrictions utilisateurs</h4>
+                        <p>Désactiver le gestionnaire des tâches pour les users.</p>
+                    </div>
+                </div>
+            </section>
+
+            <!-- 04 — DOCKER & DEVOPS -->
+            <section class="theme-section animate-in delay-4">
+                <div class="theme-header">
+                    <h2 data-num="04."><span>🐳</span> Docker &amp; DevOps</h2>
+                    <span class="count">3 procédures</span>
+                </div>
+                <div class="procedure-list">
+                    <a href="projet-docker-apache.html" class="procedure-item" style="text-decoration: none; color: inherit;">
+                        <span class="proc-type">Projet détaillé</span>
+                        <h4>Docker Apache2 + docker-compose</h4>
+                        <p>Conteneur Apache2 avec SSH GitHub pour hébergement web.</p>
+                    </a>
+                    <div class="procedure-item">
+                        <span class="proc-type">Orchestration</span>
+                        <h4>Stack n8n + Ollama + SSH</h4>
+                        <p>Architecture multi-conteneurs avec réseau bridge et volumes.</p>
+                    </div>
+                    <div class="procedure-item">
+                        <span class="proc-type">Git</span>
+                        <h4>Workflow Git complet</h4>
+                        <p>clone, add, commit, pull --rebase, push — gestion des conflits.</p>
+                    </div>
+                </div>
+            </section>
+
+            <!-- 05 — WEB -->
+            <section class="theme-section animate-in delay-5">
+                <div class="theme-header">
+                    <h2 data-num="05."><span>🌍</span> Web &amp; Hébergement</h2>
+                    <span class="count">2 procédures</span>
+                </div>
+                <div class="procedure-list">
+                    <a href="projet-github-pages.html" class="procedure-item" style="text-decoration: none; color: inherit;">
+                        <span class="proc-type">Projet détaillé</span>
+                        <h4>Mise en ligne via GitHub Pages</h4>
+                        <p>Hébergement gratuit d'un site statique sur GitHub.</p>
+                    </a>
+                    <div class="procedure-item">
+                        <span class="proc-type">Web</span>
+                        <h4>HTTP / HTTPS / TCP</h4>
+                        <p>Principes de communication web et sécurisation TLS/SSL.</p>
+                    </div>
+                </div>
+            </section>
+
+            <!-- 06 — SÉCURITÉ -->
+            <section class="theme-section animate-in delay-6">
+                <div class="theme-header">
+                    <h2 data-num="06."><span>🛡️</span> Sécurité</h2>
+                    <span class="count">4 procédures</span>
+                </div>
+                <div class="procedure-list">
+                    <a href="projet-ssh-keys.html" class="procedure-item" style="text-decoration: none; color: inherit;">
+                        <span class="proc-type">Projet détaillé</span>
+                        <h4>Configuration SSH par clé publique</h4>
+                        <p>Génération clés Windows → dépôt sur VM Debian.</p>
+                    </a>
+                    <a href="projet-vpn.html" class="procedure-item" style="text-decoration: none; color: inherit;">
+                        <span class="proc-type">Projet détaillé</span>
+                        <h4>Mise en place d'un VPN</h4>
+                        <p>Déploiement d'un VPN WireGuard pour télétravail sécurisé.</p>
+                    </a>
+                    <div class="procedure-item">
+                        <span class="proc-type">RGPD</span>
+                        <h4>Protection des données personnelles</h4>
+                        <p>Cadre légal RGPD, droits des personnes, obligations PME.</p>
+                    </div>
+                    <div class="procedure-item">
+                        <span class="proc-type">Sauvegarde</span>
+                        <h4>Stratégie de sauvegarde</h4>
+                        <p>Principe 3-2-1, sauvegarde externalisée, sensibilité des données.</p>
+                    </div>
+                </div>
+            </section>
+
+            <!-- 07 — OUTILS -->
+            <section class="theme-section animate-in delay-6">
+                <div class="theme-header">
+                    <h2 data-num="07."><span>🧰</span> Outils d'organisation</h2>
+                    <span class="count">3 procédures</span>
+                </div>
+                <div class="procedure-list">
+                    <div class="procedure-item">
+                        <span class="proc-type">Documentation</span>
+                        <h4>Notion comme base de connaissances</h4>
+                        <p>Structure, databases, relations, templates.</p>
+                    </div>
+                    <div class="procedure-item">
+                        <span class="proc-type">Gestion projet</span>
+                        <h4>Diagramme de Gantt</h4>
+                        <p>Planification avec MS Project et outils équivalents.</p>
+                    </div>
+                    <div class="procedure-item">
+                        <span class="proc-type">Schéma</span>
+                        <h4>Draw.io — diagrammes d'infra</h4>
+                        <p>Représentation visuelle des réseaux et systèmes.</p>
+                    </div>
+                </div>
+            </section>
+        </div>
+    </main>
+
+    <footer>
+        <span>© 2026 Alienis SAHIN</span>
+        <span class="sep">/</span>
+        <span>Portfolio BTS SIO SISR</span>
+        <span class="sep">/</span>
+        <span>Caen · Normandie</span>
+    </footer>
+
+    <script src="app.js"></script>
+</body>
+</html>

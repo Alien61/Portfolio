@@ -1,0 +1,216 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Création d'un Active Directory | Alienis SAHIN</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <nav>
+        <div class="nav-container">
+            <a href="index.html" class="logo">alienis<span class="suffix">.sh</span></a>
+            <button class="hamburger" id="hamburger-btn" aria-label="Menu"><span></span><span></span><span></span></button>
+            <ul class="nav-links" id="nav-links">
+                <li><a href="index.html">accueil</a></li>
+                <li><a href="parcours.html">parcours</a></li>
+                <li><a href="competences.html">competences</a></li>
+                <li><a href="procedures.html">procedures</a></li>
+                <li><a href="projets.html" class="active">projets</a></li>
+                <li><a href="synthese-e5.html">synthèse E5</a></li>
+                <li><a href="contact.html">contact</a></li>
+            </ul>
+        </div>
+    </nav>
+    <div class="nav-overlay" id="nav-overlay"></div>
+
+    <main>
+        <div class="container">
+            <a href="projets.html" class="back-link">← retour aux projets</a>
+
+            <section class="section-header animate-in">
+                <span class="label">Projet 04 — Infrastructure</span>
+                <h1>Création d'un Active Directory + Client</h1>
+                <p class="subtitle">
+                    Installer le rôle AD DS, promouvoir un serveur Windows en contrôleur de domaine
+                    et intégrer un poste client.
+                </p>
+            </section>
+
+            <div class="procedure-meta animate-in delay-1">
+                <div class="meta-item"><span class="meta-label">OS serveur</span><span class="meta-value">Windows Server 2022</span></div>
+                <div class="meta-item"><span class="meta-label">OS client</span><span class="meta-value">Windows 10/11 Pro</span></div>
+                <div class="meta-item"><span class="meta-label">Durée</span><span class="meta-value">~1h30</span></div>
+                <div class="meta-item"><span class="meta-label">Niveau</span><span class="meta-value">Intermédiaire</span></div>
+            </div>
+
+            <div class="procedure-layout">
+                <aside class="toc">
+                    <div class="toc-title">Sommaire</div>
+                    <ol>
+                        <li><a href="#objectif">Objectif &amp; principe</a></li>
+                        <li><a href="#prerequis">Prérequis</a></li>
+                        <li><a href="#ip-serveur">IP statique du serveur</a></li>
+                        <li><a href="#nom">Renommer le serveur</a></li>
+                        <li><a href="#role">Installation du rôle AD DS</a></li>
+                        <li><a href="#promotion">Promotion en contrôleur</a></li>
+                        <li><a href="#verif-serveur">Vérification côté serveur</a></li>
+                        <li><a href="#client">Configuration du client</a></li>
+                        <li><a href="#jointure">Jointure au domaine</a></li>
+                    </ol>
+                </aside>
+
+                <div class="procedure-content">
+                    <section id="objectif">
+                        <h2 data-step="01">Objectif &amp; principe</h2>
+                        <p>
+                            L'<strong>Active Directory (AD)</strong> est le service d'annuaire Microsoft qui gère
+                            l'authentification et l'identification des utilisateurs et des ressources dans un
+                            réseau d'entreprise.
+                        </p>
+                        <p>Il centralise la gestion :</p>
+                        <ul>
+                            <li>Des <strong>comptes utilisateurs</strong> (login unique pour toute l'entreprise)</li>
+                            <li>Des <strong>groupes</strong> et des permissions</li>
+                            <li>Des <strong>ressources partagées</strong> : dossiers, imprimantes, applications</li>
+                            <li>Des <strong>politiques de sécurité</strong> via GPO</li>
+                        </ul>
+                    </section>
+
+                    <section id="prerequis">
+                        <h2 data-step="02">Prérequis</h2>
+                        <ul>
+                            <li>Une VM Windows Server 2022 (ou 2019) installée</li>
+                            <li>Un compte Administrateur local</li>
+                            <li>Connexion réseau fonctionnelle</li>
+                            <li>Une VM Windows 10/11 Pro pour le client (Home ne peut pas rejoindre un domaine)</li>
+                        </ul>
+                    </section>
+
+                    <section id="ip-serveur">
+                        <h2 data-step="03">IP statique du serveur</h2>
+                        <p>
+                            Un contrôleur de domaine <strong>doit</strong> avoir une IP fixe. Si elle change,
+                            les clients ne trouveront plus le DC.
+                        </p>
+                        <ul>
+                            <li><code>Paramètres</code> → <code>Réseau et Internet</code> → <code>Paramètres réseau avancés</code></li>
+                            <li>Clic droit sur la carte → <code>Propriétés</code> → <code>IPv4</code> → <code>Propriétés</code></li>
+                        </ul>
+                        <pre data-lang="Config"><code>Adresse IP    : 10.0.0.10
+Masque        : 255.255.255.0
+Passerelle    : 10.0.0.254
+DNS primaire  : 127.0.0.1</code></pre>
+                    </section>
+
+                    <section id="nom">
+                        <h2 data-step="04">Renommer le serveur (avant promotion)</h2>
+                        <div class="callout callout-warn">
+                            <span class="icon">⚠️</span>
+                            <p>Toujours renommer <strong>avant</strong> la promotion en DC : changer le nom après implique une reconfiguration complète.</p>
+                        </div>
+                        <pre data-lang="PowerShell"><code>Rename-Computer -NewName "SRV-AD01" -Restart</code></pre>
+                    </section>
+
+                    <section id="role">
+                        <h2 data-step="05">Installation du rôle AD DS</h2>
+                        <ul>
+                            <li>Ouvrir le <strong>Gestionnaire de serveur</strong></li>
+                            <li>Menu <code>Gérer</code> → <code>Ajouter des rôles et fonctionnalités</code></li>
+                            <li>Type d'installation : <strong>Installation basée sur un rôle</strong></li>
+                            <li>Sélectionner le serveur local</li>
+                            <li>Cocher <strong>Services AD DS</strong> (accepter les fonctionnalités associées)</li>
+                            <li>Cocher <strong>Serveur DNS</strong> si pas déjà présent</li>
+                            <li>Valider l'installation et attendre la fin</li>
+                        </ul>
+                    </section>
+
+                    <section id="promotion">
+                        <h2 data-step="06">Promotion en contrôleur de domaine</h2>
+                        <p>Après l'installation du rôle, une notification apparaît (drapeau ⚑) :</p>
+                        <ul>
+                            <li>Cliquer sur le drapeau → <strong>Promouvoir ce serveur en contrôleur de domaine</strong></li>
+                            <li>Sélectionner <strong>Ajouter une nouvelle forêt</strong></li>
+                            <li>Nom du domaine racine : <code>alienis.lan</code></li>
+                            <li>Niveau fonctionnel : Windows Server 2016 ou plus récent</li>
+                            <li>Saisir un mot de passe DSRM (mode restauration)</li>
+                            <li>Laisser le reste par défaut</li>
+                            <li>Cliquer sur <strong>Installer</strong> → le serveur redémarre</li>
+                        </ul>
+                    </section>
+
+                    <section id="verif-serveur">
+                        <h2 data-step="07">Vérification côté serveur</h2>
+                        <p>Après redémarrage, se connecter avec <code>ALIENIS\Administrateur</code>.</p>
+                        <pre data-lang="PowerShell"><code># Vérifier le rôle
+Get-ADDomain
+
+# Voir le nom du contrôleur
+Get-ADDomainController
+
+# Tester le DNS
+nslookup alienis.lan</code></pre>
+                        <p>Les outils d'administration sont disponibles dans <strong>Outils d'administration Windows</strong> :</p>
+                        <ul>
+                            <li>Utilisateurs et ordinateurs Active Directory</li>
+                            <li>Domaines et approbations Active Directory</li>
+                            <li>Sites et services Active Directory</li>
+                            <li>Gestion des stratégies de groupe</li>
+                        </ul>
+                    </section>
+
+                    <section id="client">
+                        <h2 data-step="08">Configuration IP du poste client</h2>
+                        <p>Sur la VM Windows 10/11 Pro, configurer une IP statique :</p>
+                        <pre data-lang="Config client"><code>Adresse IP    : 10.0.0.50
+Masque        : 255.255.255.0
+Passerelle    : 10.0.0.254
+DNS primaire  : 10.0.0.10     ← IP du serveur AD
+DNS secondaire: (vide ou DNS public)</code></pre>
+
+                        <div class="callout callout-warn">
+                            <span class="icon">⚠️</span>
+                            <p>Le DNS primaire du client <strong>doit absolument</strong> être l'IP du contrôleur de domaine. Sans ça, la jointure au domaine échoue.</p>
+                        </div>
+
+                        <p>Tester la résolution du domaine :</p>
+                        <pre data-lang="cmd"><code>ping alienis.lan
+nslookup alienis.lan</code></pre>
+                    </section>
+
+                    <section id="jointure">
+                        <h2 data-step="09">Jointure du client au domaine</h2>
+                        <ul>
+                            <li><code>Paramètres</code> → <code>Système</code> → <code>À propos</code></li>
+                            <li>Section <code>Paramètres associés</code> → <strong>Renommer ce PC (avancé)</strong></li>
+                            <li>Onglet <code>Nom de l'ordinateur</code> → bouton <strong>Modifier</strong></li>
+                            <li>Cocher <strong>Domaine</strong> → saisir <code>alienis.lan</code></li>
+                            <li>S'authentifier avec un compte Administrateur du domaine</li>
+                            <li>Message de bienvenue → OK → <strong>redémarrer le PC</strong></li>
+                        </ul>
+
+                        <p>Au redémarrage, se connecter avec un compte du domaine :</p>
+                        <pre data-lang="Login"><code>Utilisateur : ALIENIS\Administrateur   (ou j.dupont@alienis.lan)
+Mot de passe: ****</code></pre>
+
+                        <div class="callout">
+                            <span class="icon">✅</span>
+                            <p>Le PC apparaît désormais dans <strong>Utilisateurs et ordinateurs AD</strong> → <code>Computers</code> côté serveur. Les comptes AD peuvent s'y connecter.</p>
+                        </div>
+                    </section>
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <footer>
+        <span>© 2026 Alienis SAHIN</span>
+        <span class="sep">/</span>
+        <span>Portfolio BTS SIO SISR</span>
+        <span class="sep">/</span>
+        <span>Caen · Normandie</span>
+    </footer>
+
+    <script src="app.js"></script>
+</body>
+</html>

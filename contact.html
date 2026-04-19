@@ -1,0 +1,117 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Contact | Alienis SAHIN</title>
+    <meta name="description" content="Contactez Alienis SAHIN — Disponible pour stage et alternance.">
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <nav>
+        <div class="nav-container">
+            <a href="index.html" class="logo">alienis<span class="suffix">.sh</span></a>
+            <button class="hamburger" id="hamburger-btn" aria-label="Menu"><span></span><span></span><span></span></button>
+            <ul class="nav-links" id="nav-links">
+                <li><a href="index.html">accueil</a></li>
+                <li><a href="parcours.html">parcours</a></li>
+                <li><a href="competences.html">competences</a></li>
+                <li><a href="procedures.html">procedures</a></li>
+                <li><a href="projets.html">projets</a></li>
+                <li><a href="synthese-e5.html">synthèse E5</a></li>
+                <li><a href="contact.html" class="active">contact</a></li>
+            </ul>
+        </div>
+    </nav>
+    <div class="nav-overlay" id="nav-overlay"></div>
+
+    <main>
+        <div class="container">
+            <section class="section-header animate-in">
+                <span class="label">Me contacter</span>
+                <h1>Prenons contact</h1>
+                <p class="subtitle">
+                    Une question, une opportunité de stage ou d'alternance ?
+                    N'hésitez pas à me contacter via le formulaire ci-dessous.
+                </p>
+            </section>
+
+            <div class="contact-wrap">
+                <div class="card animate-in delay-1">
+                    <form id="contact-form" onsubmit="handleSubmit(event)">
+                        <div class="form-row">
+                            <div class="form-group">
+                                <label for="name">Nom</label>
+                                <input type="text" id="name" name="name" placeholder="Votre nom" required>
+                            </div>
+                            <div class="form-group">
+                                <label for="firstname">Prénom</label>
+                                <input type="text" id="firstname" name="firstname" placeholder="Votre prénom" required>
+                            </div>
+                        </div>
+                        <div class="form-group">
+                            <label for="email">Email</label>
+                            <input type="email" id="email" name="email" placeholder="votre@email.com" required>
+                        </div>
+                        <div class="form-group">
+                            <label for="subject">Sujet</label>
+                            <input type="text" id="subject" name="subject" placeholder="Objet de votre message" required>
+                        </div>
+                        <div class="form-group">
+                            <label for="message">Message</label>
+                            <textarea id="message" name="message" placeholder="Votre message..." required></textarea>
+                        </div>
+                        <button type="submit" class="btn btn-primary">
+                            Envoyer le message <span class="arrow">→</span>
+                        </button>
+                    </form>
+                    <div id="form-success">
+                        ✓ Message envoyé. Je vous réponds dans les plus brefs délais.
+                    </div>
+                </div>
+
+                <div class="contact-info animate-in delay-2">
+                    <div class="contact-info-item">
+                        <div class="icon">📍</div>
+                        <div class="info">
+                            <strong>Localisation</strong>
+                            <span>Caen, Normandie, France</span>
+                        </div>
+                    </div>
+                    <div class="contact-info-item">
+                        <div class="icon">🎓</div>
+                        <div class="info">
+                            <strong>Formation</strong>
+                            <span>BTS SIO SISR — My Digital School</span>
+                        </div>
+                    </div>
+                    <div class="contact-info-item">
+                        <div class="icon">💼</div>
+                        <div class="info">
+                            <strong>Disponibilité</strong>
+                            <span>Stage &amp; alternance</span>
+                        </div>
+                    </div>
+                    <div class="contact-info-item">
+                        <div class="icon">🔗</div>
+                        <div class="info">
+                            <strong>GitHub</strong>
+                            <span>@alienissahin</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <footer>
+        <span>© 2026 Alienis SAHIN</span>
+        <span class="sep">/</span>
+        <span>Portfolio BTS SIO SISR</span>
+        <span class="sep">/</span>
+        <span>Caen · Normandie</span>
+    </footer>
+
+    <script src="app.js"></script>
+</body>
+</html>

@@ -1,0 +1,629 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Synthèse E5 | Alienis SAHIN</title>
+    <meta name="description" content="Tableau de synthèse des réalisations professionnelles E5 et veille technologique — BTS SIO SISR.">
+    <link rel="stylesheet" href="style.css">
+    <style>
+        /* Table E5 spécifique */
+        .synthese-table {
+            width: 100%;
+            border-collapse: collapse;
+            font-size: 0.85rem;
+            margin: 1.5rem 0 2.5rem;
+            background: var(--bg-card);
+            border: 1px solid var(--border);
+            border-radius: var(--radius-lg);
+            overflow: hidden;
+        }
+        .synthese-table th {
+            background: rgba(124, 58, 237, 0.15);
+            color: var(--violet-glow);
+            font-family: var(--font-mono);
+            font-size: 0.78rem;
+            text-transform: uppercase;
+            letter-spacing: 0.1em;
+            padding: 1rem 1rem;
+            text-align: left;
+            border-bottom: 1px solid var(--border-strong);
+            vertical-align: top;
+        }
+        .synthese-table td {
+            padding: 1rem 1rem;
+            border-bottom: 1px solid var(--border);
+            vertical-align: top;
+            color: var(--text-1);
+            line-height: 1.6;
+        }
+        .synthese-table tr:last-child td {
+            border-bottom: none;
+        }
+        .synthese-table .competence-name {
+            font-weight: 600;
+            color: var(--violet-glow);
+            font-family: var(--font-mono);
+            font-size: 0.82rem;
+            width: 22%;
+        }
+        .synthese-table .competence-list {
+            width: 38%;
+            font-size: 0.8rem;
+            color: var(--text-2);
+        }
+        .synthese-table .competence-list ul {
+            margin: 0;
+            padding-left: 1rem;
+        }
+        .synthese-table .competence-list li {
+            margin-bottom: 0.25rem;
+        }
+        .synthese-table .realisations {
+            width: 40%;
+        }
+        .realisation-item {
+            padding: 0.55rem 0.75rem;
+            background: rgba(124, 58, 237, 0.08);
+            border-left: 2px solid var(--violet-light);
+            border-radius: 3px;
+            margin-bottom: 0.5rem;
+            font-size: 0.85rem;
+        }
+        .realisation-item strong {
+            color: var(--text-0);
+            display: block;
+            margin-bottom: 0.15rem;
+        }
+        .realisation-item .ref {
+            font-family: var(--font-mono);
+            font-size: 0.7rem;
+            color: var(--violet-light);
+        }
+
+        .synthese-header-block {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 1rem;
+            padding: 1.5rem;
+            background: var(--bg-card);
+            border: 1px solid var(--border);
+            border-radius: var(--radius-lg);
+            margin-bottom: 2rem;
+        }
+        .synthese-header-block .hb-item {
+            display: flex;
+            flex-direction: column;
+            gap: 0.25rem;
+        }
+        .synthese-header-block .hb-label {
+            font-family: var(--font-mono);
+            font-size: 0.7rem;
+            text-transform: uppercase;
+            letter-spacing: 0.1em;
+            color: var(--text-3);
+        }
+        .synthese-header-block .hb-value {
+            color: var(--text-0);
+            font-weight: 500;
+        }
+
+        .option-check {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.4rem;
+            font-family: var(--font-mono);
+            font-size: 0.8rem;
+        }
+        .option-check .box {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            width: 20px;
+            height: 20px;
+            border: 1px solid var(--border-strong);
+            border-radius: 3px;
+            background: var(--bg-code);
+        }
+        .option-check.checked .box {
+            background: var(--violet);
+            border-color: var(--violet);
+            color: white;
+        }
+
+        /* Veille */
+        .veille-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+            gap: 1rem;
+            margin-top: 1rem;
+        }
+        .veille-source {
+            padding: 1.2rem;
+            background: var(--bg-card);
+            border: 1px solid var(--border);
+            border-radius: var(--radius-lg);
+            transition: all var(--t-med);
+        }
+        .veille-source:hover {
+            border-color: var(--violet-light);
+            transform: translateY(-2px);
+        }
+        .veille-source .vs-type {
+            font-family: var(--font-mono);
+            font-size: 0.7rem;
+            color: var(--violet-light);
+            text-transform: uppercase;
+            letter-spacing: 0.1em;
+            margin-bottom: 0.4rem;
+        }
+        .veille-source h4 {
+            margin-bottom: 0.4rem;
+            color: var(--text-0);
+        }
+        .veille-source p {
+            font-size: 0.85rem;
+            margin-bottom: 0;
+        }
+
+        .theme-veille-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+            gap: 0.85rem;
+            margin-top: 1rem;
+        }
+        .theme-veille {
+            padding: 0.9rem 1rem;
+            background: rgba(124, 58, 237, 0.08);
+            border: 1px solid rgba(167, 139, 250, 0.2);
+            border-radius: var(--radius);
+            font-size: 0.88rem;
+        }
+        .theme-veille strong {
+            color: var(--violet-glow);
+            display: block;
+            font-family: var(--font-mono);
+            font-size: 0.8rem;
+            margin-bottom: 0.3rem;
+        }
+
+        @media (max-width: 900px) {
+            .synthese-table {
+                display: block;
+                overflow-x: auto;
+                white-space: normal;
+            }
+            .synthese-table .competence-name,
+            .synthese-table .competence-list,
+            .synthese-table .realisations {
+                min-width: 200px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <nav>
+        <div class="nav-container">
+            <a href="index.html" class="logo">alienis<span class="suffix">.sh</span></a>
+            <button class="hamburger" id="hamburger-btn" aria-label="Menu"><span></span><span></span><span></span></button>
+            <ul class="nav-links" id="nav-links">
+                <li><a href="index.html">accueil</a></li>
+                <li><a href="parcours.html">parcours</a></li>
+                <li><a href="competences.html">competences</a></li>
+                <li><a href="procedures.html">procedures</a></li>
+                <li><a href="projets.html">projets</a></li>
+                <li><a href="synthese-e5.html" class="active">synthèse E5</a></li>
+                <li><a href="contact.html">contact</a></li>
+            </ul>
+        </div>
+    </nav>
+    <div class="nav-overlay" id="nav-overlay"></div>
+
+    <main>
+        <div class="container">
+            <section class="section-header animate-in">
+                <span class="label">Épreuve E5 — BTS SIO</span>
+                <h1>Tableau de synthèse &amp; Veille</h1>
+                <p class="subtitle">
+                    Tableau officiel des réalisations professionnelles mobilisées lors des épreuves
+                    E5 (Production &amp; Fourniture de services informatiques) et E6 (Cybersécurité),
+                    accompagné de ma démarche de veille technologique.
+                </p>
+            </section>
+
+            <!-- Bouton téléchargement PDF -->
+            <div class="animate-in delay-1" style="margin-bottom: 2rem;">
+                <a href="synthese-e5-alienis.pdf" download class="btn btn-primary">
+                    📄 Télécharger le tableau officiel (PDF) <span class="arrow">↓</span>
+                </a>
+                <p style="margin-top: 0.75rem; font-size: 0.85rem; color: var(--text-2);">
+                    Version imprimable au format paysage A4 — prête à être remise au jury.
+                </p>
+            </div>
+
+            <!-- En-tête administratif du tableau E5 -->
+            <div class="synthese-header-block animate-in delay-1">
+                <div class="hb-item">
+                    <span class="hb-label">Nom &amp; Prénom</span>
+                    <span class="hb-value">SAHIN Alienis</span>
+                </div>
+                <div class="hb-item">
+                    <span class="hb-label">Session</span>
+                    <span class="hb-value">BTS SIO 2026</span>
+                </div>
+                <div class="hb-item">
+                    <span class="hb-label">Centre de formation</span>
+                    <span class="hb-value">My Digital School — Caen</span>
+                </div>
+                <div class="hb-item">
+                    <span class="hb-label">Option</span>
+                    <span class="hb-value">
+                        <span class="option-check checked"><span class="box">✓</span> SISR</span>
+                        &nbsp;&nbsp;
+                        <span class="option-check"><span class="box"></span> SLAM</span>
+                    </span>
+                </div>
+                <div class="hb-item">
+                    <span class="hb-label">Portfolio</span>
+                    <span class="hb-value">alienissahin.github.io/portfolio</span>
+                </div>
+                <div class="hb-item">
+                    <span class="hb-label">Période</span>
+                    <span class="hb-value">09/2025 — 06/2026</span>
+                </div>
+            </div>
+
+            <!-- ================= TABLEAU DE SYNTHÈSE ================= -->
+            <h2 style="margin-top: 2.5rem; margin-bottom: 0.5rem;" class="animate-in delay-2">Tableau de synthèse des réalisations professionnelles</h2>
+            <p class="animate-in delay-2" style="color: var(--text-2); margin-bottom: 1rem;">
+                Pour chaque compétence du référentiel SISR, voici les réalisations concrètes que j'ai
+                menées durant ma formation, avec les procédures détaillées disponibles dans le portfolio.
+            </p>
+
+            <table class="synthese-table animate-in delay-3">
+                <thead>
+                    <tr>
+                        <th>Compétence</th>
+                        <th>Composantes mises en œuvre</th>
+                        <th>Réalisations professionnelles</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <!-- Gérer le patrimoine informatique -->
+                    <tr>
+                        <td class="competence-name">Gérer le patrimoine informatique</td>
+                        <td class="competence-list">
+                            <ul>
+                                <li>Recenser et identifier les ressources numériques</li>
+                                <li>Exploiter des référentiels, normes et standards</li>
+                                <li>Mettre en place et vérifier les niveaux d'habilitation</li>
+                                <li>Vérifier les conditions de la continuité d'un service</li>
+                                <li>Gérer des sauvegardes</li>
+                                <li>Vérifier le respect des règles d'utilisation</li>
+                            </ul>
+                        </td>
+                        <td class="realisations">
+                            <div class="realisation-item">
+                                <strong>Infrastructure alienis.lan</strong>
+                                <span class="ref">▸ projet-societe-alienis.html</span>
+                                <div>Déploiement AD DS, création d'OU, gestion des utilisateurs et groupes, habilitations via GPO.</div>
+                            </div>
+                            <div class="realisation-item">
+                                <strong>GPO de sécurité</strong>
+                                <span class="ref">▸ GPO signature SMB · GPO restriction</span>
+                                <div>Mise en place de GPO restreignant les droits utilisateurs et sécurisant les échanges.</div>
+                            </div>
+                            <div class="realisation-item">
+                                <strong>Stratégie de sauvegarde 3-2-1</strong>
+                                <span class="ref">▸ U7 Sécurité organisation</span>
+                                <div>Étude et formalisation d'une politique de sauvegarde externalisée pour PME.</div>
+                            </div>
+                        </td>
+                    </tr>
+
+                    <!-- Répondre aux incidents -->
+                    <tr>
+                        <td class="competence-name">Répondre aux incidents et aux demandes d'assistance et d'évolution</td>
+                        <td class="competence-list">
+                            <ul>
+                                <li>Collecter, suivre et orienter des demandes</li>
+                                <li>Traiter des demandes concernant les services réseau et système</li>
+                                <li>Traiter des demandes concernant les applications</li>
+                            </ul>
+                        </td>
+                        <td class="realisations">
+                            <div class="realisation-item">
+                                <strong>Configuration DHCP &amp; DNS</strong>
+                                <span class="ref">▸ projet-dhcp.html · projet-active-directory.html</span>
+                                <div>Résolution d'incidents d'adressage IP, consultation des baux, réservations MAC.</div>
+                            </div>
+                            <div class="realisation-item">
+                                <strong>Expérience Helpdesk préalable</strong>
+                                <span class="ref">▸ Aston École Informatique (2024)</span>
+                                <div>Formation Technicien Helpdesk : GLPI, prise en main à distance, gestion de tickets.</div>
+                            </div>
+                            <div class="realisation-item">
+                                <strong>Dépannage SSH &amp; droits Linux</strong>
+                                <span class="ref">▸ projet-ssh-keys.html · Commandes Linux</span>
+                                <div>Diagnostic de connexions SSH, gestion des permissions sur .ssh, chown/chmod.</div>
+                            </div>
+                        </td>
+                    </tr>
+
+                    <!-- Développer la présence en ligne -->
+                    <tr>
+                        <td class="competence-name">Développer la présence en ligne de l'organisation</td>
+                        <td class="competence-list">
+                            <ul>
+                                <li>Participer à la valorisation de l'image de l'organisation sur les médias numériques</li>
+                                <li>Référencer les services en ligne et mesurer leur visibilité</li>
+                                <li>Participer à l'évolution d'un site Web exploitant les données de l'organisation</li>
+                            </ul>
+                        </td>
+                        <td class="realisations">
+                            <div class="realisation-item">
+                                <strong>Portfolio professionnel</strong>
+                                <span class="ref">▸ ce site — HTML/CSS, GitHub Pages</span>
+                                <div>Conception, rédaction et mise en ligne du portfolio actuel, responsive et référencé.</div>
+                            </div>
+                            <div class="realisation-item">
+                                <strong>AutoPage Notion → Portfolio</strong>
+                                <span class="ref">▸ projet-autopage.html</span>
+                                <div>Automatisation de la publication de pages Web à partir d'une base Notion (n8n + IA).</div>
+                            </div>
+                            <div class="realisation-item">
+                                <strong>Identité numérique &amp; RGPD</strong>
+                                <span class="ref">▸ U7 Sécurité · page Identité numérique</span>
+                                <div>Étude de l'identité numérique d'une organisation, noms de domaine, comptes sociaux.</div>
+                            </div>
+                        </td>
+                    </tr>
+
+                    <!-- Travailler en mode projet -->
+                    <tr>
+                        <td class="competence-name">Travailler en mode projet</td>
+                        <td class="competence-list">
+                            <ul>
+                                <li>Analyser les objectifs et les modalités d'organisation d'un projet</li>
+                                <li>Planifier les activités</li>
+                                <li>Évaluer les indicateurs de suivi et analyser les écarts</li>
+                            </ul>
+                        </td>
+                        <td class="realisations">
+                            <div class="realisation-item">
+                                <strong>GDF IA — projet de groupe</strong>
+                                <span class="ref">▸ projets.html</span>
+                                <div>Conception en équipe d'un gestionnaire de fichier avec IA locale (Ollama).</div>
+                            </div>
+                            <div class="realisation-item">
+                                <strong>Planification &amp; outils</strong>
+                                <span class="ref">▸ Notion · Gantt · MS Project · Projeqtor</span>
+                                <div>Gestion de projet avec diagramme de Gantt, triangle QCD, découpage en tâches.</div>
+                            </div>
+                            <div class="realisation-item">
+                                <strong>AutoPage — projet personnel complet</strong>
+                                <span class="ref">▸ projet-autopage.html</span>
+                                <div>Analyse du besoin, conception de la stack, prototypage, déploiement et mise en production.</div>
+                            </div>
+                        </td>
+                    </tr>
+
+                    <!-- Mettre à disposition un service -->
+                    <tr>
+                        <td class="competence-name">Mettre à disposition des utilisateurs un service informatique</td>
+                        <td class="competence-list">
+                            <ul>
+                                <li>Réaliser les tests d'intégration et d'acceptation d'un service</li>
+                                <li>Déployer un service</li>
+                                <li>Accompagner les utilisateurs dans la mise en place d'un service</li>
+                            </ul>
+                        </td>
+                        <td class="realisations">
+                            <div class="realisation-item">
+                                <strong>Docker Apache + docker-compose</strong>
+                                <span class="ref">▸ projet-docker-apache.html</span>
+                                <div>Conteneurisation complète avec tests et workflow Git pour les mises à jour.</div>
+                            </div>
+                            <div class="realisation-item">
+                                <strong>Publication GitHub Pages</strong>
+                                <span class="ref">▸ projet-github-pages.html</span>
+                                <div>Service de publication web automatisé avec déploiement continu.</div>
+                            </div>
+                            <div class="realisation-item">
+                                <strong>VPN WireGuard</strong>
+                                <span class="ref">▸ projet-vpn.html</span>
+                                <div>Mise à disposition d'un service VPN pour le télétravail sécurisé.</div>
+                            </div>
+                        </td>
+                    </tr>
+
+                    <!-- Organiser son développement pro -->
+                    <tr>
+                        <td class="competence-name">Organiser son développement professionnel</td>
+                        <td class="competence-list">
+                            <ul>
+                                <li>Mettre en place son environnement d'apprentissage personnel</li>
+                                <li>Mettre en œuvre des outils et stratégies de veille informationnelle</li>
+                                <li>Gérer son identité professionnelle</li>
+                                <li>Développer son projet professionnel</li>
+                            </ul>
+                        </td>
+                        <td class="realisations">
+                            <div class="realisation-item">
+                                <strong>Base de connaissances Notion</strong>
+                                <span class="ref">▸ Espace personnel Admin Système Réseaux</span>
+                                <div>Documentation structurée de l'ensemble des cours et procédures réalisées.</div>
+                            </div>
+                            <div class="realisation-item">
+                                <strong>Veille technologique active</strong>
+                                <span class="ref">▸ voir section dédiée ci-dessous</span>
+                                <div>Abonnement à des flux RSS, newsletters, blogs spécialisés (cf. détail).</div>
+                            </div>
+                            <div class="realisation-item">
+                                <strong>Portfolio &amp; GitHub professionnels</strong>
+                                <span class="ref">▸ ce site · github.com/alienissahin</div>
+                                <div>Construction d'une identité numérique professionnelle cohérente.</div>
+                            </div>
+                        </td>
+                    </tr>
+                </tbody>
+            </table>
+
+            <!-- Légende type de réalisation -->
+            <div class="card animate-in delay-4" style="margin-bottom: 2.5rem;">
+                <h3>Type de réalisations</h3>
+                <p style="font-size: 0.88rem;">Selon le modèle officiel, chaque réalisation se classe dans une catégorie :</p>
+                <ul style="font-size: 0.88rem; margin-left: 1rem;">
+                    <li>✅ <strong>Réalisation en cours de formation</strong> — toutes mes procédures documentées ici</li>
+                    <li>⏳ <strong>Réalisations en milieu professionnel — 1ère année</strong> — à compléter après stage (juin 2026)</li>
+                    <li>⏳ <strong>Réalisations en milieu professionnel — 2ème année</strong> — à compléter en 2ème année</li>
+                </ul>
+            </div>
+
+            <!-- ================= VEILLE TECHNOLOGIQUE ================= -->
+            <section style="margin-top: 3rem;" class="animate-in delay-5">
+                <h2>Veille technologique</h2>
+                <p>
+                    La veille technologique est une <strong>compétence transversale</strong> essentielle
+                    attendue par le jury. Elle démontre la capacité à rester à jour dans un domaine en
+                    évolution rapide, et à développer son environnement d'apprentissage personnel.
+                </p>
+            </section>
+
+            <!-- Thèmes de veille -->
+            <h3 style="margin-top: 1.5rem;" class="animate-in delay-5">Mes thèmes de veille</h3>
+            <div class="theme-veille-grid animate-in delay-5">
+                <div class="theme-veille">
+                    <strong>Cybersécurité</strong>
+                    Failles critiques (CVE), bonnes pratiques, actualités CERT-FR, RGPD.
+                </div>
+                <div class="theme-veille">
+                    <strong>DevOps &amp; Conteneurisation</strong>
+                    Docker, Kubernetes, évolutions des outils d'orchestration.
+                </div>
+                <div class="theme-veille">
+                    <strong>IA locale &amp; Automatisation</strong>
+                    Ollama, modèles open-source, n8n, workflows automatisés.
+                </div>
+                <div class="theme-veille">
+                    <strong>Linux &amp; Open Source</strong>
+                    Nouvelles versions Debian/Ubuntu, kernel, distributions serveurs.
+                </div>
+                <div class="theme-veille">
+                    <strong>Windows Server &amp; AD</strong>
+                    Nouveautés Microsoft, évolutions AD, Azure AD (Entra ID).
+                </div>
+                <div class="theme-veille">
+                    <strong>Réseau &amp; VPN</strong>
+                    WireGuard, IPv6, SD-WAN, Zero Trust Networking.
+                </div>
+            </div>
+
+            <!-- Sources -->
+            <h3 style="margin-top: 2rem;" class="animate-in delay-6">Mes sources</h3>
+            <div class="veille-grid animate-in delay-6">
+                <div class="veille-source">
+                    <div class="vs-type">Institutionnel · CERT</div>
+                    <h4>CERT-FR (ANSSI)</h4>
+                    <p>Bulletins d'alerte et d'actualité sur les vulnérabilités critiques. Source officielle française.</p>
+                </div>
+
+                <div class="veille-source">
+                    <div class="vs-type">Média spécialisé</div>
+                    <h4>LeMagIT &amp; Le Monde Informatique</h4>
+                    <p>Actualités IT francophones : infrastructure, cybersécurité, DevOps, stratégies SI.</p>
+                </div>
+
+                <div class="veille-source">
+                    <div class="vs-type">Communauté</div>
+                    <h4>Reddit (r/sysadmin, r/homelab)</h4>
+                    <p>Retours d'expérience concrets de sysadmins du monde entier, cas pratiques.</p>
+                </div>
+
+                <div class="veille-source">
+                    <div class="vs-type">Agrégateur</div>
+                    <h4>Hacker News</h4>
+                    <p>Actualités tech internationales, annonces produits, articles de fond sur la sécurité.</p>
+                </div>
+
+                <div class="veille-source">
+                    <div class="vs-type">Blog technique</div>
+                    <h4>IT-Connect.fr</h4>
+                    <p>Tutoriels Windows Server, Linux, PowerShell, Active Directory — en français.</p>
+                </div>
+
+                <div class="veille-source">
+                    <div class="vs-type">Vidéo</div>
+                    <h4>YouTube — NetworkChuck, Xavki</h4>
+                    <p>Tutoriels techniques, démonstrations, veille vulgarisée.</p>
+                </div>
+            </div>
+
+            <!-- Outils de veille -->
+            <h3 style="margin-top: 2rem;" class="animate-in delay-6">Mes outils de veille</h3>
+            <div class="veille-grid animate-in delay-6">
+                <div class="veille-source">
+                    <div class="vs-type">Agrégateur RSS</div>
+                    <h4>Feedly</h4>
+                    <p>Centralisation de tous mes flux RSS classés par thème. Lecture quotidienne de 15 à 30 minutes.</p>
+                </div>
+
+                <div class="veille-source">
+                    <div class="vs-type">Documentation</div>
+                    <h4>Notion</h4>
+                    <p>Capitalisation et reformulation des informations clés pour les retrouver facilement.</p>
+                </div>
+
+                <div class="veille-source">
+                    <div class="vs-type">Newsletter</div>
+                    <h4>Mailing listes spécialisées</h4>
+                    <p>Newsletters hebdomadaires (CERT-FR, IT-Connect, Korben) pour une synthèse régulière.</p>
+                </div>
+
+                <div class="veille-source">
+                    <div class="vs-type">Social</div>
+                    <h4>LinkedIn &amp; X (Twitter)</h4>
+                    <p>Suivi de comptes de référence : experts cybersécurité, DevOps influenceurs techniques.</p>
+                </div>
+            </div>
+
+            <!-- Méthode de veille -->
+            <div class="card animate-in delay-6" style="margin-top: 2rem;">
+                <h3>Ma méthode en 4 étapes</h3>
+                <ol style="margin-left: 1.2rem; margin-top: 0.5rem;">
+                    <li><strong>Collecte</strong> — Feedly agrège mes flux RSS chaque matin</li>
+                    <li><strong>Tri &amp; sélection</strong> — 15 min quotidiennes pour identifier les sujets pertinents</li>
+                    <li><strong>Approfondissement</strong> — Lecture complète + test pratique si nécessaire</li>
+                    <li><strong>Capitalisation</strong> — Synthèse dans Notion, tag par thème, réutilisation future</li>
+                </ol>
+                <div class="callout" style="margin-top: 1rem;">
+                    <span class="icon">💡</span>
+                    <p>Cette démarche structurée me permet de transformer une simple consultation d'articles en <strong>montée en compétence durable</strong>. Chaque info importante est reformulée, contextualisée et archivée.</p>
+                </div>
+            </div>
+
+            <!-- Signature -->
+            <div style="margin-top: 3rem; padding-top: 2rem; border-top: 1px solid var(--border); text-align: right; font-family: var(--font-mono); font-size: 0.85rem; color: var(--text-2);">
+                <p style="margin-bottom: 0.2rem;">Fait à Caen, le <span id="today-date"></span></p>
+                <p style="margin-bottom: 0;">Signature — Alienis SAHIN</p>
+            </div>
+        </div>
+    </main>
+
+    <footer>
+        <span>© 2026 Alienis SAHIN</span>
+        <span class="sep">/</span>
+        <span>Portfolio BTS SIO SISR</span>
+        <span class="sep">/</span>
+        <span>Caen · Normandie</span>
+    </footer>
+
+    <script src="app.js"></script>
+    <script>
+        // Date du jour auto
+        const today = new Date().toLocaleDateString('fr-FR', { year: 'numeric', month: 'long', day: 'numeric' });
+        const el = document.getElementById('today-date');
+        if (el) el.textContent = today;
+    </script>
+</body>
+</html>

@@ -1,0 +1,235 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Configuration SSH par clé publique | Alienis SAHIN</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <nav>
+        <div class="nav-container">
+            <a href="index.html" class="logo">alienis<span class="suffix">.sh</span></a>
+            <button class="hamburger" id="hamburger-btn" aria-label="Menu"><span></span><span></span><span></span></button>
+            <ul class="nav-links" id="nav-links">
+                <li><a href="index.html">accueil</a></li>
+                <li><a href="parcours.html">parcours</a></li>
+                <li><a href="competences.html">competences</a></li>
+                <li><a href="procedures.html">procedures</a></li>
+                <li><a href="projets.html" class="active">projets</a></li>
+                <li><a href="synthese-e5.html">synthèse E5</a></li>
+                <li><a href="contact.html">contact</a></li>
+            </ul>
+        </div>
+    </nav>
+    <div class="nav-overlay" id="nav-overlay"></div>
+
+    <main>
+        <div class="container">
+            <a href="projets.html" class="back-link">← retour aux projets</a>
+
+            <section class="section-header animate-in">
+                <span class="label">Projet 07 — Sécurité</span>
+                <h1>Configuration SSH par clé publique</h1>
+                <p class="subtitle">
+                    Générer une paire de clés SSH sur Windows et déposer la clé publique sur une VM Debian
+                    pour se connecter sans mot de passe, de façon sécurisée.
+                </p>
+            </section>
+
+            <div class="procedure-meta animate-in delay-1">
+                <div class="meta-item"><span class="meta-label">Client</span><span class="meta-value">Windows 10/11</span></div>
+                <div class="meta-item"><span class="meta-label">Serveur</span><span class="meta-value">VM Debian</span></div>
+                <div class="meta-item"><span class="meta-label">Durée</span><span class="meta-value">~20 minutes</span></div>
+                <div class="meta-item"><span class="meta-label">Algo clé</span><span class="meta-value">ed25519 / RSA 4096</span></div>
+            </div>
+
+            <div class="procedure-layout">
+                <aside class="toc">
+                    <div class="toc-title">Sommaire</div>
+                    <ol>
+                        <li><a href="#principe">Principe</a></li>
+                        <li><a href="#prerequis">Prérequis</a></li>
+                        <li><a href="#generer">Génération des clés</a></li>
+                        <li><a href="#recup-publique">Récupérer la clé publique</a></li>
+                        <li><a href="#deposer">Déposer la clé sur la VM</a></li>
+                        <li><a href="#permissions">Droits sur .ssh</a></li>
+                        <li><a href="#test">Test de connexion</a></li>
+                        <li><a href="#hardening">Durcissement du serveur</a></li>
+                    </ol>
+                </aside>
+
+                <div class="procedure-content">
+                    <section id="principe">
+                        <h2 data-step="01">Principe de l'authentification par clé</h2>
+                        <p>
+                            Plutôt que de s'authentifier par mot de passe, on utilise une paire de clés
+                            cryptographiques :
+                        </p>
+                        <ul>
+                            <li><strong>Clé privée</strong> — reste sur le poste client, <em>jamais</em> partagée</li>
+                            <li><strong>Clé publique</strong> — déposée sur le serveur dans <code>authorized_keys</code></li>
+                        </ul>
+                        <p>Avantages :</p>
+                        <ul>
+                            <li>Plus sécurisé qu'un mot de passe (pas de brute-force possible)</li>
+                            <li>Connexion sans saisir de mot de passe à chaque fois</li>
+                            <li>Indispensable pour l'automatisation (scripts, CI/CD, n8n…)</li>
+                        </ul>
+                    </section>
+
+                    <section id="prerequis">
+                        <h2 data-step="02">Prérequis</h2>
+                        <ul>
+                            <li>Windows 10/11 avec <strong>OpenSSH Client</strong> activé (installé par défaut depuis 2018)</li>
+                            <li>Une VM Debian avec <code>openssh-server</code> installé et actif</li>
+                            <li>La connectivité réseau entre le poste et la VM (<code>ping</code> fonctionne)</li>
+                            <li>Un compte utilisateur sur la VM Debian</li>
+                        </ul>
+                        <p>Vérifier OpenSSH côté Windows :</p>
+                        <pre data-lang="PowerShell"><code>Get-WindowsCapability -Online | Where-Object Name -like 'OpenSSH*'</code></pre>
+
+                        <p>Installer OpenSSH Server sur la VM Debian si besoin :</p>
+                        <pre data-lang="bash (VM)"><code>sudo apt update
+sudo apt install openssh-server -y
+sudo systemctl enable --now ssh
+sudo systemctl status ssh</code></pre>
+                    </section>
+
+                    <section id="generer">
+                        <h2 data-step="03">Génération de la paire de clés (sur Windows)</h2>
+                        <p>Ouvrir PowerShell et lancer :</p>
+                        <pre data-lang="PowerShell"><code>ssh-keygen -t ed25519 -C "alienis@portfolio"</code></pre>
+                        <p>
+                            Ou pour une clé RSA 4096 bits (compatibilité maximale) :
+                        </p>
+                        <pre data-lang="PowerShell"><code>ssh-keygen -t rsa -b 4096 -C "alienis@portfolio"</code></pre>
+                        <p>À chaque question :</p>
+                        <ul>
+                            <li><strong>Enter file in which to save the key</strong> : appuyer sur Entrée (emplacement par défaut <code>C:\Users\&lt;user&gt;\.ssh\id_ed25519</code>)</li>
+                            <li><strong>Enter passphrase</strong> : laisser vide OU saisir une phrase de passe (plus sûr mais il faudra la taper à chaque fois)</li>
+                        </ul>
+
+                        <p>Deux fichiers sont créés :</p>
+                        <table>
+                            <thead><tr><th>Fichier</th><th>Rôle</th></tr></thead>
+                            <tbody>
+                                <tr><td><code>id_ed25519</code></td><td>Clé <strong>privée</strong> — à protéger comme un mot de passe</td></tr>
+                                <tr><td><code>id_ed25519.pub</code></td><td>Clé <strong>publique</strong> — à déposer sur le serveur</td></tr>
+                            </tbody>
+                        </table>
+                    </section>
+
+                    <section id="recup-publique">
+                        <h2 data-step="04">Récupérer la clé publique</h2>
+                        <p>Afficher le contenu de la clé publique pour la copier :</p>
+                        <pre data-lang="PowerShell"><code>Get-Content $env:USERPROFILE\.ssh\id_ed25519.pub</code></pre>
+                        <p>Ou simplement :</p>
+                        <pre data-lang="PowerShell"><code>cat ~/.ssh/id_ed25519.pub</code></pre>
+                        <p>La sortie ressemble à :</p>
+                        <pre data-lang="pub-key"><code>ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAI... alienis@portfolio</code></pre>
+                        <p><strong>Sélectionner et copier toute cette ligne</strong>, d'un seul tenant.</p>
+                    </section>
+
+                    <section id="deposer">
+                        <h2 data-step="05">Déposer la clé publique sur la VM Debian</h2>
+                        <p>Se connecter en SSH à la VM avec le mot de passe (dernière fois !) :</p>
+                        <pre data-lang="PowerShell"><code>ssh alienis@10.0.0.20</code></pre>
+
+                        <p>Une fois connecté, créer le dossier <code>.ssh</code> si nécessaire :</p>
+                        <pre data-lang="bash (VM)"><code># Créer le dossier .ssh dans le home de l'utilisateur
+mkdir -p ~/.ssh
+
+# Éditer (ou créer) le fichier authorized_keys
+nano ~/.ssh/authorized_keys</code></pre>
+                        <p>
+                            <strong>Coller</strong> la clé publique copiée depuis Windows, sur une seule ligne.
+                            Sauver : <code>Ctrl+O</code> → Entrée → <code>Ctrl+X</code>.
+                        </p>
+
+                        <div class="callout callout-tip">
+                            <span class="icon">💡</span>
+                            <p>Le fichier <code>authorized_keys</code> peut contenir plusieurs clés publiques (une par ligne) — pratique pour autoriser plusieurs postes.</p>
+                        </div>
+                    </section>
+
+                    <section id="permissions">
+                        <h2 data-step="06">Droits sur le dossier .ssh</h2>
+                        <p>
+                            SSH est <strong>très strict</strong> sur les permissions. Si le dossier ou le fichier
+                            sont trop ouverts, la connexion par clé est refusée sans explication claire.
+                        </p>
+                        <pre data-lang="bash (VM)"><code>chmod 700 ~/.ssh
+chmod 600 ~/.ssh/authorized_keys
+chown -R $USER:$USER ~/.ssh</code></pre>
+
+                        <table>
+                            <thead><tr><th>Élément</th><th>Droits</th><th>Signification</th></tr></thead>
+                            <tbody>
+                                <tr><td>~/.ssh/</td><td>700</td><td>Seul le propriétaire accède</td></tr>
+                                <tr><td>authorized_keys</td><td>600</td><td>Lecture/écriture propriétaire uniquement</td></tr>
+                                <tr><td>id_ed25519 (privée, côté Windows)</td><td>600</td><td>Idem — à protéger</td></tr>
+                            </tbody>
+                        </table>
+                    </section>
+
+                    <section id="test">
+                        <h2 data-step="07">Test de connexion</h2>
+                        <p>Depuis PowerShell Windows :</p>
+                        <pre data-lang="PowerShell"><code>ssh alienis@10.0.0.20</code></pre>
+                        <p>
+                            Si tout est bien configuré, la connexion s'ouvre <strong>sans demander de mot de passe</strong>.
+                        </p>
+
+                        <h3>En cas d'échec — diagnostic</h3>
+                        <pre data-lang="PowerShell"><code>ssh -v alienis@10.0.0.20</code></pre>
+                        <p>Le mode verbose (<code>-v</code>) indique à quelle étape ça échoue :</p>
+                        <ul>
+                            <li><code>Offering public key</code> → la clé est bien proposée</li>
+                            <li><code>Server accepts key</code> → la clé est acceptée</li>
+                            <li>Si échec : vérifier les droits sur <code>.ssh</code> côté VM</li>
+                        </ul>
+                    </section>
+
+                    <section id="hardening">
+                        <h2 data-step="08">Durcissement — désactiver le mot de passe</h2>
+                        <p>
+                            Une fois la clé fonctionnelle, on peut <strong>désactiver complètement</strong> l'authentification
+                            par mot de passe pour forcer l'usage des clés.
+                        </p>
+                        <pre data-lang="bash (VM)"><code>sudo nano /etc/ssh/sshd_config</code></pre>
+                        <p>Modifier (ou ajouter) ces lignes :</p>
+                        <pre data-lang="sshd_config"><code>PasswordAuthentication no
+ChallengeResponseAuthentication no
+PubkeyAuthentication yes
+PermitRootLogin prohibit-password</code></pre>
+
+                        <p>Redémarrer le service SSH :</p>
+                        <pre data-lang="bash (VM)"><code>sudo systemctl restart ssh</code></pre>
+
+                        <div class="callout callout-warn">
+                            <span class="icon">⚠️</span>
+                            <p><strong>Ne pas fermer</strong> la session SSH en cours avant d'avoir testé la reconnexion par clé dans un <em>autre</em> terminal. Sinon, en cas de problème, accès perdu.</p>
+                        </div>
+
+                        <div class="callout">
+                            <span class="icon">✅</span>
+                            <p>Le serveur n'accepte désormais que les connexions par clé publique. Les attaques par force brute sur les mots de passe deviennent impossibles.</p>
+                        </div>
+                    </section>
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <footer>
+        <span>© 2026 Alienis SAHIN</span>
+        <span class="sep">/</span>
+        <span>Portfolio BTS SIO SISR</span>
+        <span class="sep">/</span>
+        <span>Caen · Normandie</span>
+    </footer>
+
+    <script src="app.js"></script>
+</body>
+</html>

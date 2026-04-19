@@ -1,0 +1,153 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Alienis SAHIN — Admin Systèmes & Réseaux</title>
+    <meta name="description" content="Portfolio d'Alienis SAHIN — Étudiant BTS SIO SISR. Administration systèmes, réseaux, cybersécurité et DevOps.">
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <!-- Navigation -->
+    <nav>
+        <div class="nav-container">
+            <a href="index.html" class="logo">alienis<span class="suffix">.sh</span></a>
+            <button class="hamburger" id="hamburger-btn" aria-label="Menu"><span></span><span></span><span></span></button>
+            <ul class="nav-links" id="nav-links">
+                <li><a href="index.html" class="active">accueil</a></li>
+                <li><a href="parcours.html">parcours</a></li>
+                <li><a href="competences.html">competences</a></li>
+                <li><a href="procedures.html">procedures</a></li>
+                <li><a href="projets.html">projets</a></li>
+                <li><a href="synthese-e5.html">synthèse E5</a></li>
+                <li><a href="contact.html">contact</a></li>
+            </ul>
+        </div>
+    </nav>
+    <div class="nav-overlay" id="nav-overlay"></div>
+
+    <main>
+        <div class="container">
+            <section class="hero">
+                <div class="hero-grid">
+                    <div>
+                        <div class="hero-badge">
+                            <span class="dot"></span>
+                            Disponible pour stage / alternance
+                        </div>
+
+                        <h1>Bonjour, je suis <span class="accent">Alienis</span></h1>
+
+                        <p class="subtitle">
+                            Étudiant en BTS SIO option SISR à My Digital School — passionné par
+                            l'administration systèmes, les réseaux et la cybersécurité.
+                        </p>
+
+                        <div class="hero-actions">
+                            <a href="projets.html" class="btn btn-primary">
+                                Voir mes projets <span class="arrow">→</span>
+                            </a>
+                            <a href="contact.html" class="btn btn-ghost">
+                                Me contacter <span class="arrow">→</span>
+                            </a>
+                        </div>
+                    </div>
+
+                    <div class="terminal-card">
+                        <div class="terminal-header">
+                            <span class="dot-red"></span>
+                            <span class="dot-yellow"></span>
+                            <span class="dot-green"></span>
+                            <span class="path">~/alienis/about.sh</span>
+                        </div>
+                        <div class="terminal-body">
+                            <div class="cmd">whoami</div>
+                            <div class="out">Alienis SAHIN, 22 ans — Caen, Normandie</div>
+
+                            <div class="cmd">cat formation.txt</div>
+                            <div class="out">
+                                <span class="key">school</span> = <span class="val">"My Digital School"</span><br>
+                                <span class="key">cursus</span> = <span class="val">"BTS SIO — SISR"</span><br>
+                                <span class="key">year</span>   = <span class="val">"1ère année"</span>
+                            </div>
+
+                            <div class="cmd">ls ./stack</div>
+                            <div class="out">
+                                linux/ &nbsp; windows-server/ &nbsp; docker/ <br>
+                                active-directory/ &nbsp; apache2/ &nbsp; ssh/ <br>
+                                n8n/ &nbsp; ollama/ &nbsp; git/ &nbsp; notion/
+                            </div>
+
+                            <div class="cmd">status</div>
+                            <div class="out">
+                                <span style="color: var(--green);">●</span> Disponible pour opportunités
+                            </div>
+
+                            <div class="cmd"><span style="animation: blink 1.2s step-end infinite;">_</span></div>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Quick highlights -->
+            <section style="margin-top: 4rem;">
+                <div class="competence-grid">
+                    <div class="card animate-in delay-1">
+                        <div class="card-num">// 01</div>
+                        <h3><span class="icon">🖥️</span> Admin Systèmes</h3>
+                        <p>Déploiement, configuration et maintenance de serveurs Linux et Windows.</p>
+                        <div class="tags">
+                            <span class="tag">Debian</span>
+                            <span class="tag">Windows Server</span>
+                            <span class="tag">SSH</span>
+                        </div>
+                    </div>
+
+                    <div class="card animate-in delay-2">
+                        <div class="card-num">// 02</div>
+                        <h3><span class="icon">🌐</span> Réseau & Infra</h3>
+                        <p>DHCP, DNS, Active Directory et architecture d'un réseau d'entreprise.</p>
+                        <div class="tags">
+                            <span class="tag">AD</span>
+                            <span class="tag">DHCP</span>
+                            <span class="tag">GPO</span>
+                        </div>
+                    </div>
+
+                    <div class="card animate-in delay-3">
+                        <div class="card-num">// 03</div>
+                        <h3><span class="icon">🐳</span> DevOps</h3>
+                        <p>Conteneurisation, automatisation et déploiement continu.</p>
+                        <div class="tags">
+                            <span class="tag">Docker</span>
+                            <span class="tag">n8n</span>
+                            <span class="tag">Git</span>
+                        </div>
+                    </div>
+
+                    <div class="card animate-in delay-4">
+                        <div class="card-num">// 04</div>
+                        <h3><span class="icon">🔒</span> Cybersécurité</h3>
+                        <p>RGPD, sécurisation des infrastructures et protection de la donnée.</p>
+                        <div class="tags">
+                            <span class="tag">RGPD</span>
+                            <span class="tag">Firewall</span>
+                            <span class="tag">SSL</span>
+                        </div>
+                    </div>
+                </div>
+            </section>
+        </div>
+    </main>
+
+    <footer>
+        <span>© 2026 Alienis SAHIN</span>
+        <span class="sep">/</span>
+        <span>Portfolio BTS SIO SISR</span>
+        <span class="sep">/</span>
+        <span>Caen · Normandie</span>
+    </footer>
+
+    <script src="app.js"></script>
+</body>
+</html>

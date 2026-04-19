@@ -1,0 +1,247 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Docker Apache2 + docker-compose | Alienis SAHIN</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <nav>
+        <div class="nav-container">
+            <a href="index.html" class="logo">alienis<span class="suffix">.sh</span></a>
+            <button class="hamburger" id="hamburger-btn" aria-label="Menu"><span></span><span></span><span></span></button>
+            <ul class="nav-links" id="nav-links">
+                <li><a href="index.html">accueil</a></li>
+                <li><a href="parcours.html">parcours</a></li>
+                <li><a href="competences.html">competences</a></li>
+                <li><a href="procedures.html">procedures</a></li>
+                <li><a href="projets.html" class="active">projets</a></li>
+                <li><a href="synthese-e5.html">synthèse E5</a></li>
+                <li><a href="contact.html">contact</a></li>
+            </ul>
+        </div>
+    </nav>
+    <div class="nav-overlay" id="nav-overlay"></div>
+
+    <main>
+        <div class="container">
+            <a href="projets.html" class="back-link">← retour aux projets</a>
+
+            <section class="section-header animate-in">
+                <span class="label">Projet 03 — DevOps</span>
+                <h1>Docker Apache2 + docker-compose avec SSH GitHub</h1>
+                <p class="subtitle">
+                    Conteneurisation d'Apache2 avec docker-compose, connexion SSH via GitHub
+                    pour héberger un site web, avec tout le workflow Git.
+                </p>
+            </section>
+
+            <div class="procedure-meta animate-in delay-1">
+                <div class="meta-item"><span class="meta-label">Stack</span><span class="meta-value">Docker · Apache · SSH</span></div>
+                <div class="meta-item"><span class="meta-label">Durée</span><span class="meta-value">~1h30</span></div>
+                <div class="meta-item"><span class="meta-label">Port</span><span class="meta-value">8080 → 80</span></div>
+                <div class="meta-item"><span class="meta-label">Niveau</span><span class="meta-value">Intermédiaire</span></div>
+            </div>
+
+            <div class="procedure-layout">
+                <aside class="toc">
+                    <div class="toc-title">Sommaire</div>
+                    <ol>
+                        <li><a href="#objectif">Objectif</a></li>
+                        <li><a href="#prerequis">Prérequis</a></li>
+                        <li><a href="#compose">Fichier docker-compose</a></li>
+                        <li><a href="#lancement">Lancement des services</a></li>
+                        <li><a href="#ssh-keys">Clés SSH pour GitHub</a></li>
+                        <li><a href="#clone">Clone du repository</a></li>
+                        <li><a href="#workflow">Workflow Git complet</a></li>
+                        <li><a href="#acces">Accès au site</a></li>
+                    </ol>
+                </aside>
+
+                <div class="procedure-content">
+                    <section id="objectif">
+                        <h2 data-step="01">Objectif</h2>
+                        <p>
+                            Conteneuriser un serveur web Apache2 avec <strong>docker-compose</strong>, et
+                            synchroniser le contenu avec un repository GitHub via SSH. Le déploiement
+                            devient reproductible et portable sur n'importe quelle machine avec Docker.
+                        </p>
+                    </section>
+
+                    <section id="prerequis">
+                        <h2 data-step="02">Prérequis</h2>
+                        <ul>
+                            <li><strong>Docker Desktop</strong> ou <strong>Docker Engine</strong> installé</li>
+                            <li><code>docker --version</code> et <code>docker compose version</code> fonctionnels</li>
+                            <li>Un compte GitHub avec un repository contenant le site</li>
+                            <li>PowerShell ou Bash</li>
+                        </ul>
+                    </section>
+
+                    <section id="compose">
+                        <h2 data-step="03">Fichier docker-compose.yml</h2>
+                        <p>Créer un dossier de travail et le fichier <code>docker-compose.yml</code> :</p>
+                        <pre data-lang="yaml"><code>services:
+  apache:
+    image: httpd:2.4
+    container_name: apache-web
+    restart: unless-stopped
+    ports:
+      - "8080:80"
+    volumes:
+      - site_data:/usr/local/apache2/htdocs
+    networks:
+      - web_network
+
+  ssh:
+    image: lscr.io/linuxserver/openssh-server:latest
+    container_name: ssh-web
+    restart: unless-stopped
+    ports:
+      - "2222:2222"
+    environment:
+      - PUID=0
+      - PGID=0
+      - USER_NAME=deploy
+      - PASSWORD_ACCESS=true
+      - USER_PASSWORD=change-me
+    volumes:
+      - site_data:/usr/local/apache2/htdocs
+      - ssh_keys:/root/.ssh
+    networks:
+      - web_network
+
+volumes:
+  site_data:
+  ssh_keys:
+
+networks:
+  web_network:
+    driver: bridge</code></pre>
+                        <div class="callout callout-tip">
+                            <span class="icon">💡</span>
+                            <p>Le volume <code>site_data</code> est <strong>partagé</strong> entre les deux conteneurs : Apache le sert en lecture, SSH y écrit les mises à jour venant de GitHub.</p>
+                        </div>
+                    </section>
+
+                    <section id="lancement">
+                        <h2 data-step="04">Lancement des services</h2>
+                        <pre data-lang="bash"><code># Lancer les deux conteneurs en arrière-plan
+docker compose up -d
+
+# Vérifier l'état
+docker ps
+
+# Voir les logs
+docker logs apache-web
+docker logs ssh-web</code></pre>
+                    </section>
+
+                    <section id="ssh-keys">
+                        <h2 data-step="05">Génération des clés SSH pour GitHub</h2>
+                        <p>Entrer dans le conteneur SSH :</p>
+                        <pre data-lang="bash"><code>docker exec -it ssh-web sh
+apk add --no-cache git openssh-keygen
+ssh-keygen -t ed25519 -f /root/.ssh/github_key -N ""
+cat /root/.ssh/github_key.pub</code></pre>
+
+                        <p>Copier la clé publique et l'ajouter sur GitHub :</p>
+                        <ul>
+                            <li>GitHub → <strong>Settings</strong> → <strong>SSH and GPG keys</strong></li>
+                            <li><strong>New SSH key</strong> → coller la clé publique</li>
+                        </ul>
+
+                        <p>Configurer SSH pour utiliser cette clé :</p>
+                        <pre data-lang="bash"><code>cat &gt; /root/.ssh/config &lt;&lt;EOF
+Host github.com
+    HostName github.com
+    User git
+    IdentityFile /root/.ssh/github_key
+EOF
+chmod 600 /root/.ssh/config /root/.ssh/github_key
+
+# Tester la connexion
+ssh -T git@github.com</code></pre>
+                    </section>
+
+                    <section id="clone">
+                        <h2 data-step="06">Clone du repository GitHub</h2>
+                        <pre data-lang="bash"><code>cd /usr/local/apache2/htdocs
+rm -rf ./*   # vider le contenu par défaut
+git clone git@github.com:VotreNom/portfolio.git .
+git config --global --add safe.directory /usr/local/apache2/htdocs</code></pre>
+                    </section>
+
+                    <section id="workflow">
+                        <h2 data-step="07">Workflow Git complet</h2>
+                        <h3>Configuration initiale (une fois)</h3>
+                        <pre data-lang="bash"><code>git config --global user.email "vous@exemple.com"
+git config --global user.name "VotreNom"</code></pre>
+
+                        <h3>Mise à jour du site depuis GitHub</h3>
+                        <pre data-lang="bash"><code>cd /usr/local/apache2/htdocs
+git pull --rebase origin main</code></pre>
+
+                        <h3>Modification directe dans le conteneur</h3>
+                        <pre data-lang="bash"><code>cd /usr/local/apache2/htdocs
+# ... modifier les fichiers ...
+git status
+git add .
+git commit -m "Update: contenu mis à jour"
+git pull --rebase origin main   # toujours avant le push
+git push origin main</code></pre>
+
+                        <div class="callout callout-warn">
+                            <span class="icon">⚠️</span>
+                            <p>Toujours faire <code>git pull --rebase</code> <strong>avant</strong> <code>git push</code> pour éviter les rejets si le remote a des commits plus récents.</p>
+                        </div>
+
+                        <h3>Gestion des conflits</h3>
+                        <pre data-lang="bash"><code># En cas de conflit lors du pull
+git status                    # identifier les fichiers en conflit
+# ... résoudre manuellement les conflits dans les fichiers ...
+git add &lt;fichier-résolu&gt;
+git rebase --continue
+
+# Ou annuler le rebase
+git rebase --abort</code></pre>
+                    </section>
+
+                    <section id="acces">
+                        <h2 data-step="08">Accès au site</h2>
+                        <p>Le site est accessible à :</p>
+                        <pre data-lang="url"><code>http://localhost:8080</code></pre>
+                        <p>Depuis une autre machine du réseau :</p>
+                        <pre data-lang="url"><code>http://&lt;IP-de-la-machine-hôte&gt;:8080</code></pre>
+
+                        <h3>Arrêt &amp; redémarrage</h3>
+                        <pre data-lang="bash"><code># Arrêter sans perdre les données
+docker compose stop
+
+# Redémarrer
+docker compose start
+
+# Tout supprimer (conteneurs + volumes)
+docker compose down -v</code></pre>
+                        <div class="callout">
+                            <span class="icon">✅</span>
+                            <p>Les modifications dans le repo GitHub peuvent être déployées instantanément avec un simple <code>git pull</code> dans le conteneur — un vrai workflow CI/CD minimal.</p>
+                        </div>
+                    </section>
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <footer>
+        <span>© 2026 Alienis SAHIN</span>
+        <span class="sep">/</span>
+        <span>Portfolio BTS SIO SISR</span>
+        <span class="sep">/</span>
+        <span>Caen · Normandie</span>
+    </footer>
+
+    <script src="app.js"></script>
+</body>
+</html>

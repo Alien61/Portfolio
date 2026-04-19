@@ -1,0 +1,422 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AutoPage — Notion → Portfolio | Alienis SAHIN</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <nav>
+        <div class="nav-container">
+            <a href="index.html" class="logo">alienis<span class="suffix">.sh</span></a>
+            <button class="hamburger" id="hamburger-btn" aria-label="Menu"><span></span><span></span><span></span></button>
+            <ul class="nav-links" id="nav-links">
+                <li><a href="index.html">accueil</a></li>
+                <li><a href="parcours.html">parcours</a></li>
+                <li><a href="competences.html">competences</a></li>
+                <li><a href="procedures.html">procedures</a></li>
+                <li><a href="projets.html" class="active">projets</a></li>
+                <li><a href="synthese-e5.html">synthèse E5</a></li>
+                <li><a href="contact.html">contact</a></li>
+            </ul>
+        </div>
+    </nav>
+    <div class="nav-overlay" id="nav-overlay"></div>
+
+    <main>
+        <div class="container">
+            <a href="projets.html" class="back-link">← retour aux projets</a>
+
+            <section class="section-header animate-in">
+                <span class="label">Projet 09 — DevOps · IA · Automatisation</span>
+                <h1>AutoPage — Notion → Portfolio</h1>
+                <p class="subtitle">
+                    Système d'automatisation qui génère et publie des pages HTML sur GitHub Pages
+                    à partir de contenu Notion, avec génération HTML assistée par IA locale.
+                </p>
+            </section>
+
+            <div class="procedure-meta animate-in delay-1">
+                <div class="meta-item"><span class="meta-label">Stack</span><span class="meta-value">n8n · Ollama · Docker</span></div>
+                <div class="meta-item"><span class="meta-label">Modèle IA</span><span class="meta-value">llama3 (local CPU)</span></div>
+                <div class="meta-item"><span class="meta-label">Nodes n8n</span><span class="meta-value">10</span></div>
+                <div class="meta-item"><span class="meta-label">Niveau</span><span class="meta-value">Avancé</span></div>
+            </div>
+
+            <div class="procedure-layout">
+                <aside class="toc">
+                    <div class="toc-title">Sommaire</div>
+                    <ol>
+                        <li><a href="#presentation">Présentation</a></li>
+                        <li><a href="#prerequis">Prérequis</a></li>
+                        <li><a href="#compose">Docker Compose</a></li>
+                        <li><a href="#lancement">Lancement</a></li>
+                        <li><a href="#ollama">Modèle Ollama</a></li>
+                        <li><a href="#git">Git dans ssh_server</a></li>
+                        <li><a href="#ssh">SSH par clé</a></li>
+                        <li><a href="#notion">Intégration Notion</a></li>
+                        <li><a href="#github">Token GitHub</a></li>
+                        <li><a href="#workflow">Workflow n8n (10 nodes)</a></li>
+                        <li><a href="#test">Test &amp; activation</a></li>
+                    </ol>
+                </aside>
+
+                <div class="procedure-content">
+                    <section id="presentation">
+                        <h2 data-step="01">Présentation du projet</h2>
+                        <p>
+                            AutoPage est un système d'automatisation qui génère et publie automatiquement
+                            des pages HTML sur un portfolio GitHub Pages à partir de contenu rédigé dans
+                            Notion. Dès qu'une nouvelle entrée est créée dans une base de données Notion,
+                            le workflow s'enclenche sans aucune intervention manuelle.
+                        </p>
+                        <h3>Stack technique</h3>
+                        <table>
+                            <thead><tr><th>Composant</th><th>Rôle</th></tr></thead>
+                            <tbody>
+                                <tr><td>n8n</td><td>Orchestration du workflow</td></tr>
+                                <tr><td>Ollama (llama3)</td><td>Génération HTML via IA locale (CPU)</td></tr>
+                                <tr><td>Docker</td><td>Containerisation des services</td></tr>
+                                <tr><td>SSH Server</td><td>Écriture fichiers &amp; opérations Git</td></tr>
+                                <tr><td>GitHub Pages</td><td>Hébergement du portfolio</td></tr>
+                                <tr><td>Notion API</td><td>Source de contenu</td></tr>
+                            </tbody>
+                        </table>
+                    </section>
+
+                    <section id="prerequis">
+                        <h2 data-step="02">Prérequis</h2>
+                        <ul>
+                            <li><strong>Docker Desktop</strong> installé sur Windows</li>
+                            <li>Un compte <strong>GitHub</strong> avec un repository Portfolio</li>
+                            <li>Un compte <strong>Notion</strong> avec un workspace</li>
+                            <li>Un navigateur web (Edge ou Firefox)</li>
+                            <li><strong>PowerShell</strong> disponible</li>
+                        </ul>
+                    </section>
+
+                    <section id="compose">
+                        <h2 data-step="03">Configuration Docker Compose</h2>
+                        <p>Créer un dossier de travail, par exemple :</p>
+                        <pre data-lang="PowerShell"><code>C:\Users\alien\Desktop\informatique\Portfolio\projet automatisation</code></pre>
+                        <p>Créer un fichier <code>docker-compose.yml</code> :</p>
+                        <pre data-lang="yaml"><code>services:
+  n8n:
+    image: docker.n8n.io/n8nio/n8n:latest
+    container_name: n8n
+    user: root
+    restart: unless-stopped
+    ports:
+      - "5678:5678"
+    environment:
+      - GENERIC_TIMEZONE=Europe/Paris
+      - TZ=Europe/Paris
+      - N8N_EDITOR_BASE_URL=http://localhost:5678
+      - WEBHOOK_URL=http://localhost:5678
+      - N8N_PROTOCOL=http
+      - N8N_HOST=localhost
+      - N8N_PORT=5678
+      - GIT_USER_EMAIL=votre-email@example.com
+      - GIT_USER_NAME=VotreNomGitHub
+      - N8N_USER_FOLDER=/home/node
+    volumes:
+      - n8n_data:/home/node
+      - portfolio_repo:/home/node/portfolio
+      - n8n_ssh:/root/.ssh
+    depends_on:
+      - ollama
+      - ssh
+    networks:
+      - ai_network
+
+  ollama:
+    image: ollama/ollama:latest
+    container_name: ollama
+    restart: unless-stopped
+    ports:
+      - "11434:11434"
+    volumes:
+      - ollama_data:/root/.ollama
+    networks:
+      - ai_network
+
+  ssh:
+    image: lscr.io/linuxserver/openssh-server:latest
+    container_name: ssh_server
+    restart: unless-stopped
+    ports:
+      - "2222:2222"
+    environment:
+      - PUID=0
+      - PGID=0
+      - USER_NAME=n8nuser
+      - USER_PASSWORD=root123
+      - PASSWORD_ACCESS=true
+    volumes:
+      - portfolio_repo:/home/node/portfolio
+      - ssh_server_keys:/config/ssh_host_keys
+      - ssh_authorized:/root/.ssh
+    networks:
+      - ai_network
+
+volumes:
+  n8n_data:
+  ollama_data:
+  portfolio_repo:
+  n8n_ssh:
+  ssh_server_keys:
+  ssh_authorized:
+
+networks:
+  ai_network:
+    driver: bridge</code></pre>
+                        <div class="callout callout-tip">
+                            <span class="icon">💡</span>
+                            <p>Remplacer <code>votre-email@example.com</code> et <code>VotreNomGitHub</code> par les vraies informations GitHub. Les volumes <code>n8n_ssh</code>, <code>ssh_server_keys</code> et <code>ssh_authorized</code> persistent les clés SSH entre redémarrages.</p>
+                        </div>
+                    </section>
+
+                    <section id="lancement">
+                        <h2 data-step="04">Lancement des containers</h2>
+                        <pre data-lang="PowerShell"><code>cd "C:\Users\alien\Desktop\informatique\Portfolio\projet automatisation"
+docker compose up -d
+docker ps</code></pre>
+                        <p>Le résultat doit montrer trois containers avec le statut <strong>Up</strong> : <code>n8n</code>, <code>ollama</code>, <code>ssh_server</code>.</p>
+                    </section>
+
+                    <section id="ollama">
+                        <h2 data-step="05">Installation du modèle Ollama</h2>
+                        <pre data-lang="PowerShell"><code>docker exec -it ollama ollama pull llama3</code></pre>
+                        <div class="callout">
+                            <span class="icon">⏱️</span>
+                            <p>Le modèle pèse environ 4,7 Go. La génération de pages tourne sur CPU et prend entre 3 et 10 minutes par page.</p>
+                        </div>
+                    </section>
+
+                    <section id="git">
+                        <h2 data-step="06">Installer Git et cloner le repo</h2>
+                        <pre data-lang="PowerShell"><code>docker exec -it ssh_server sh
+apk add --no-cache git
+
+git config --global user.email "votre-email@example.com"
+git config --global user.name "VotreNomGitHub"
+
+cd /home/node/portfolio
+git clone https://github.com/VotreNomGitHub/Portfolio.git .
+git config --global --add safe.directory /home/node/portfolio
+exit</code></pre>
+                        <div class="callout callout-warn">
+                            <span class="icon">⚠️</span>
+                            <p>Git doit être réinstallé à chaque recréation du container (Alpine Linux ne l'inclut pas). Les volumes persistent les clés mais pas les paquets installés.</p>
+                        </div>
+                    </section>
+
+                    <section id="ssh">
+                        <h2 data-step="07">Configuration SSH par clé publique</h2>
+                        <h3>Générer les clés dans n8n</h3>
+                        <pre data-lang="PowerShell"><code>docker exec -it n8n sh
+ssh-keygen -t rsa -b 4096 -f /root/.ssh/n8n_key -N ""
+cat /root/.ssh/n8n_key.pub
+exit</code></pre>
+
+                        <h3>Déposer la clé dans ssh_server</h3>
+                        <pre data-lang="PowerShell"><code>docker exec -it ssh_server sh
+mkdir -p /root/.ssh
+echo "COLLER_LA_CLE_PUBLIQUE_ICI" &gt; /root/.ssh/authorized_keys
+chmod 700 /root/.ssh
+chmod 600 /root/.ssh/authorized_keys
+exit</code></pre>
+
+                        <h3>Récupérer l'IP du container ssh_server</h3>
+                        <pre data-lang="PowerShell"><code>docker inspect ssh_server | grep IPAddress</code></pre>
+                    </section>
+
+                    <section id="notion">
+                        <h2 data-step="08">Configuration Notion</h2>
+                        <h3>Créer l'intégration</h3>
+                        <ul>
+                            <li>Aller sur <code>https://www.notion.so/my-integrations</code></li>
+                            <li>Cliquer sur <strong>New integration</strong></li>
+                            <li>Nom : <code>n8n-portfolio</code></li>
+                            <li>Copier le <strong>Internal Integration Token</strong></li>
+                        </ul>
+
+                        <h3>Créer la base de données</h3>
+                        <p>Dans Notion, taper <code>/database</code> et ajouter les colonnes :</p>
+                        <table>
+                            <thead><tr><th>Colonne</th><th>Type</th><th>Utilité</th></tr></thead>
+                            <tbody>
+                                <tr><td>Titre</td><td>Title</td><td>Nom du projet</td></tr>
+                                <tr><td>Description</td><td>Text</td><td>Courte description</td></tr>
+                                <tr><td>Slug</td><td>Text</td><td>Nom du fichier HTML</td></tr>
+                                <tr><td>Tags</td><td>Multi-select</td><td>Technologies utilisées</td></tr>
+                                <tr><td>Contenu</td><td>Text</td><td>Procédure détaillée</td></tr>
+                            </tbody>
+                        </table>
+
+                        <h3>Connecter l'intégration</h3>
+                        <p>Cliquer sur <code>...</code> en haut à droite → <code>Connections</code> → ajouter <code>n8n-portfolio</code>.</p>
+
+                        <h3>Marqueur d'insertion dans projets.html</h3>
+                        <pre data-lang="html"><code>&lt;!-- INSERTION AUTOMATIQUE ICI --&gt;</code></pre>
+                    </section>
+
+                    <section id="github">
+                        <h2 data-step="09">Création du token GitHub</h2>
+                        <ul>
+                            <li>Aller sur <code>https://github.com/settings/tokens</code></li>
+                            <li><strong>Generate new token (classic)</strong></li>
+                            <li>Nom : <code>n8n-portfolio</code></li>
+                            <li>Expiration : No expiration</li>
+                            <li>Cocher uniquement : <strong>repo</strong></li>
+                            <li>Copier le token (affiché une seule fois !)</li>
+                        </ul>
+                        <div class="callout callout-warn">
+                            <span class="icon">🔐</span>
+                            <p>Ne jamais partager ce token publiquement ni le committer dans le repository. Le stocker dans un endroit sûr.</p>
+                        </div>
+                    </section>
+
+                    <section id="workflow">
+                        <h2 data-step="10">Workflow n8n — 10 nodes</h2>
+                        <p>Ouvrir n8n à <code>http://localhost:5678</code>. Créer un compte, puis un nouveau workflow.</p>
+
+                        <h3>Node 1 — Notion Trigger</h3>
+                        <table>
+                            <tbody>
+                                <tr><td>Event</td><td>Page added to database</td></tr>
+                                <tr><td>Poll Time</td><td>Every Minute (test) / Every 15 Minutes (prod)</td></tr>
+                                <tr><td>Retry On Fail</td><td>Activé</td></tr>
+                            </tbody>
+                        </table>
+
+                        <h3>Node 2 — Notion Get Page</h3>
+                        <p>Resource : <code>Page</code> — Operation : <code>Get a database page</code> — Page ID : <code>{{ $json.id }}</code> (expression).</p>
+
+                        <h3>Node 3 — Code (JavaScript)</h3>
+                        <pre data-lang="javascript"><code>const page = $input.first().json;
+const titre = page.property_titre || '';
+const description = page.property_description || '';
+const contenu = page.property_contenu || '';
+const slug = page.property_slug || titre.toLowerCase()
+  .replace(/\s+/g, '-').replace(/[^a-z0-9-]/g, '');
+const tags = Array.isArray(page.property_tags)
+  ? page.property_tags.join(', ') : '';
+
+const htmlHeader = `&lt;!DOCTYPE html&gt;...nav...`;
+const htmlFooter = `...footer&lt;/html&gt;`;
+
+const tagsHTML = tags.split(', ')
+  .map(t =&gt; `&lt;span class="skill-tag"&gt;${t.trim()}&lt;/span&gt;`).join('\n');
+
+const promptCarte = `Tu es un générateur HTML...
+  TITRE: ${titre} | SLUG: ${slug} | TAGS: ${tags}`;
+
+const promptPage = `Tu es un générateur HTML.
+  Retourne UNIQUEMENT le code entre &lt;section&gt; et &lt;/section&gt;.
+  RÈGLES: chaque partie = &lt;div class="card"&gt;, listes = &lt;ul&gt;&lt;li&gt;,
+  commandes = &lt;pre&gt;&lt;code&gt;, TITRE: ${titre} | CONTENU: ${contenu}`;
+
+return [{ json: {
+  titre, description, contenu, slug, tags, htmlHeader, htmlFooter, tagsHTML,
+  ollamaBodyCarte: JSON.stringify({ model: 'llama3', stream: false, prompt: promptCarte }),
+  ollamaBodyPage: JSON.stringify({ model: 'llama3', stream: false, prompt: promptPage })
+}}];</code></pre>
+
+                        <h3>Nodes 4 &amp; 5 — HTTP Request vers Ollama (parallèle)</h3>
+                        <table>
+                            <tbody>
+                                <tr><td>Method</td><td>POST</td></tr>
+                                <tr><td>URL</td><td>http://ollama:11434/api/generate</td></tr>
+                                <tr><td>Body JSON (Node 4)</td><td><code>{{ $json.ollamaBodyCarte }}</code></td></tr>
+                                <tr><td>Body JSON (Node 5)</td><td><code>{{ $json.ollamaBodyPage }}</code></td></tr>
+                                <tr><td>Timeout</td><td>600 000 ms (10 min)</td></tr>
+                            </tbody>
+                        </table>
+
+                        <h3>Node 6 — Merge</h3>
+                        <p>Mode : <code>Combine</code> — Combine by : <code>Position</code>. Fusionne les deux réponses Ollama.</p>
+
+                        <h3>Node 7 — Code2 (assemblage)</h3>
+                        <pre data-lang="javascript"><code>const data = $('Code').first().json;
+const rawCarte = $('HTTP Request').first().json.response || '';
+const rawPage = $('HTTP Request2').first().json.response || '';
+
+let section = rawPage.replace(/```html/gi,'').replace(/```/g,'').trim();
+const start = section.indexOf('&lt;section&gt;');
+const end = section.lastIndexOf('&lt;/section&gt;');
+if (start !== -1 &amp;&amp; end !== -1) {
+  section = section.substring(start, end + 10);
+}
+
+const fullPage = data.htmlHeader + '\n' + section + '\n' + data.htmlFooter;
+const htmlCarte = rawCarte.replace(/```html/gi,'').replace(/```/g,'').trim();
+const slug = data.slug;
+
+// Encoder en base64 pour éviter les problèmes de caractères spéciaux
+const fullPageB64 = Buffer.from(fullPage,'utf8').toString('base64').replace(/\n/g,'');
+const htmlCarteEscaped = htmlCarte.replace(/\\/g,'\\\\').replace(/'/g,"'\\\\'");
+
+const cmdEcrirePage = `echo '${fullPageB64}' | base64 -d &gt; /home/node/portfolio/${slug}.html`;
+const cmdInsertCarte = `printf '%s' '${htmlCarteEscaped}' &gt; /tmp/carte.html
+  &amp;&amp; sed -i '/&lt;!-- INSERTION AUTOMATIQUE ICI --&gt;/ r /tmp/carte.html' /home/node/portfolio/projets.html`;
+
+return [{ json: { htmlCarte, htmlPage: fullPage, slug, cmdEcrirePage, cmdInsertCarte } }];</code></pre>
+
+                        <h3>Nodes 8, 9, 10 — SSH</h3>
+                        <p>Credentials SSH : Host = IP ssh_server, Port = 2222, User = n8nuser, Auth = Private Key (contenu de <code>n8n_key</code>).</p>
+                        <ul>
+                            <li><strong>Node 8</strong> — Command : <code>{{ $('Code2').first().json.cmdEcrirePage }}</code></li>
+                            <li><strong>Node 9</strong> — Command : <code>{{ $('Code2').first().json.cmdInsertCarte }}</code></li>
+                            <li><strong>Node 10</strong> — Git commit &amp; push :</li>
+                        </ul>
+                        <pre data-lang="bash (node 10)"><code>cd /home/node/portfolio \
+  &amp;&amp; git config --global user.email "votre-email@example.com" \
+  &amp;&amp; git config --global user.name "VotreNomGitHub" \
+  &amp;&amp; git config --global --add safe.directory /home/node/portfolio \
+  &amp;&amp; git add . \
+  &amp;&amp; git commit -m "New project: {{ $('Code2').first().json.slug }}" \
+  &amp;&amp; git pull --rebase https://VotreNomGitHub:TOKEN@github.com/VotreNomGitHub/Portfolio.git main \
+  &amp;&amp; git push https://VotreNomGitHub:TOKEN@github.com/VotreNomGitHub/Portfolio.git</code></pre>
+                    </section>
+
+                    <section id="test">
+                        <h2 data-step="11">Test &amp; activation en production</h2>
+                        <ol>
+                            <li>Créer une nouvelle entrée dans la base Notion (titre, description, slug, contenu)</li>
+                            <li>Dans n8n, cliquer sur <strong>Test workflow</strong></li>
+                            <li>Attendre 10 à 15 minutes (CPU)</li>
+                            <li>Vérifier sur GitHub : fichier <code>${slug}.html</code> créé</li>
+                            <li>Vérifier <code>projets.html</code> : nouvelle carte insérée</li>
+                            <li>Attendre 1 à 2 minutes pour GitHub Pages</li>
+                            <li>Consulter <code>https://VotreNomGitHub.github.io/Portfolio</code></li>
+                        </ol>
+
+                        <h3>Activation en production</h3>
+                        <ul>
+                            <li>Cliquer sur le bouton <code>Inactive</code> en haut à droite du workflow → <code>Active</code></li>
+                            <li>Passer le Poll Time du Notion Trigger à <strong>Every 15 Minutes</strong></li>
+                        </ul>
+
+                        <div class="callout">
+                            <span class="icon">🎉</span>
+                            <p>Le système tourne désormais en autonomie. Chaque nouvelle page Notion déclenche automatiquement la génération HTML, la mise à jour du portfolio et la publication sur GitHub Pages.</p>
+                        </div>
+                    </section>
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <footer>
+        <span>© 2026 Alienis SAHIN</span>
+        <span class="sep">/</span>
+        <span>Portfolio BTS SIO SISR</span>
+        <span class="sep">/</span>
+        <span>Caen · Normandie</span>
+    </footer>
+
+    <script src="app.js"></script>
+</body>
+</html>

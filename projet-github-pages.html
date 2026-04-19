@@ -1,0 +1,191 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Mise en ligne via GitHub Pages | Alienis SAHIN</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <nav>
+        <div class="nav-container">
+            <a href="index.html" class="logo">alienis<span class="suffix">.sh</span></a>
+            <button class="hamburger" id="hamburger-btn" aria-label="Menu"><span></span><span></span><span></span></button>
+            <ul class="nav-links" id="nav-links">
+                <li><a href="index.html">accueil</a></li>
+                <li><a href="parcours.html">parcours</a></li>
+                <li><a href="competences.html">competences</a></li>
+                <li><a href="procedures.html">procedures</a></li>
+                <li><a href="projets.html" class="active">projets</a></li>
+                <li><a href="synthese-e5.html">synthèse E5</a></li>
+                <li><a href="contact.html">contact</a></li>
+            </ul>
+        </div>
+    </nav>
+    <div class="nav-overlay" id="nav-overlay"></div>
+
+    <main>
+        <div class="container">
+            <a href="projets.html" class="back-link">← retour aux projets</a>
+
+            <section class="section-header animate-in">
+                <span class="label">Projet 01 — Web</span>
+                <h1>Mise en ligne via GitHub Pages</h1>
+                <p class="subtitle">
+                    Héberger gratuitement un site web statique sur GitHub Pages, avec
+                    déploiement automatique à chaque <code>git push</code>.
+                </p>
+            </section>
+
+            <div class="procedure-meta animate-in delay-1">
+                <div class="meta-item"><span class="meta-label">Environnement</span><span class="meta-value">GitHub · Git CLI</span></div>
+                <div class="meta-item"><span class="meta-label">Durée</span><span class="meta-value">~30 minutes</span></div>
+                <div class="meta-item"><span class="meta-label">Coût</span><span class="meta-value">Gratuit</span></div>
+                <div class="meta-item"><span class="meta-label">Niveau</span><span class="meta-value">Débutant</span></div>
+            </div>
+
+            <div class="procedure-layout">
+                <aside class="toc">
+                    <div class="toc-title">Sommaire</div>
+                    <ol>
+                        <li><a href="#objectif">Objectif</a></li>
+                        <li><a href="#prerequis">Prérequis</a></li>
+                        <li><a href="#repo">Création du repository</a></li>
+                        <li><a href="#git-local">Configuration Git locale</a></li>
+                        <li><a href="#push">Premier push</a></li>
+                        <li><a href="#pages">Activation GitHub Pages</a></li>
+                        <li><a href="#domaine">Domaine personnalisé</a></li>
+                        <li><a href="#workflow">Workflow quotidien</a></li>
+                    </ol>
+                </aside>
+
+                <div class="procedure-content">
+                    <section id="objectif">
+                        <h2 data-step="01">Objectif</h2>
+                        <p>
+                            Publier un site web statique (HTML/CSS/JS) en ligne, accessible à l'URL
+                            <code>https://&lt;username&gt;.github.io/&lt;repo&gt;</code>, sans payer d'hébergement
+                            et avec déploiement automatique à chaque modification.
+                        </p>
+                    </section>
+
+                    <section id="prerequis">
+                        <h2 data-step="02">Prérequis</h2>
+                        <ul>
+                            <li>Un compte <strong>GitHub</strong> (gratuit)</li>
+                            <li><strong>Git</strong> installé localement → <code>git --version</code></li>
+                            <li>Un terminal (PowerShell / Bash / Zsh)</li>
+                            <li>Les fichiers du site (<code>index.html</code>, <code>style.css</code>, etc.)</li>
+                        </ul>
+                    </section>
+
+                    <section id="repo">
+                        <h2 data-step="03">Création du repository GitHub</h2>
+                        <ul>
+                            <li>Se connecter sur <code>github.com</code></li>
+                            <li>Cliquer sur <strong>New</strong> (bouton vert en haut à droite)</li>
+                            <li>Nom du repo : <code>portfolio</code> (ou tout autre nom)</li>
+                            <li>Visibilité : <strong>Public</strong> (obligatoire pour GitHub Pages gratuit)</li>
+                            <li>Ne <strong>pas</strong> initialiser avec README si le projet local existe déjà</li>
+                            <li>Cliquer sur <strong>Create repository</strong></li>
+                        </ul>
+                    </section>
+
+                    <section id="git-local">
+                        <h2 data-step="04">Configuration Git locale</h2>
+                        <p>Si Git n'a jamais été configuré :</p>
+                        <pre data-lang="bash"><code>git config --global user.name "VotreNom"
+git config --global user.email "vous@exemple.com"</code></pre>
+
+                        <p>Se placer dans le dossier du site et initialiser :</p>
+                        <pre data-lang="bash"><code>cd /chemin/vers/le/site
+git init
+git branch -M main
+git remote add origin https://github.com/VotreNom/portfolio.git</code></pre>
+                    </section>
+
+                    <section id="push">
+                        <h2 data-step="05">Premier push</h2>
+                        <pre data-lang="bash"><code>git add .
+git commit -m "Initial commit — portfolio"
+git push -u origin main</code></pre>
+                        <div class="callout callout-tip">
+                            <span class="icon">🔐</span>
+                            <p>Depuis 2021, GitHub n'accepte plus le mot de passe pour Git. Il faut utiliser un <strong>Personal Access Token (PAT)</strong> → <code>github.com/settings/tokens</code> → scope <strong>repo</strong>.</p>
+                        </div>
+                    </section>
+
+                    <section id="pages">
+                        <h2 data-step="06">Activation de GitHub Pages</h2>
+                        <ul>
+                            <li>Sur le repository GitHub → onglet <strong>Settings</strong></li>
+                            <li>Menu latéral → <strong>Pages</strong></li>
+                            <li>Source : <strong>Deploy from a branch</strong></li>
+                            <li>Branch : <code>main</code> / dossier <code>/ (root)</code></li>
+                            <li>Cliquer sur <strong>Save</strong></li>
+                        </ul>
+                        <p>Après 1 à 2 minutes, le site est accessible à :</p>
+                        <pre data-lang="url"><code>https://VotreNom.github.io/portfolio/</code></pre>
+                    </section>
+
+                    <section id="domaine">
+                        <h2 data-step="07">Domaine personnalisé (optionnel)</h2>
+                        <p>Pour utiliser <code>www.mondomaine.com</code> à la place de l'URL GitHub :</p>
+                        <h3>Côté registrar (OVH, Gandi…)</h3>
+                        <table>
+                            <thead><tr><th>Type</th><th>Nom</th><th>Valeur</th></tr></thead>
+                            <tbody>
+                                <tr><td>A</td><td>@</td><td>185.199.108.153</td></tr>
+                                <tr><td>A</td><td>@</td><td>185.199.109.153</td></tr>
+                                <tr><td>A</td><td>@</td><td>185.199.110.153</td></tr>
+                                <tr><td>A</td><td>@</td><td>185.199.111.153</td></tr>
+                                <tr><td>CNAME</td><td>www</td><td>VotreNom.github.io</td></tr>
+                            </tbody>
+                        </table>
+                        <h3>Côté GitHub</h3>
+                        <ul>
+                            <li>Settings → Pages → <strong>Custom domain</strong> → saisir <code>www.mondomaine.com</code></li>
+                            <li>Attendre la validation DNS (quelques minutes à 24h)</li>
+                            <li>Cocher <strong>Enforce HTTPS</strong></li>
+                        </ul>
+                    </section>
+
+                    <section id="workflow">
+                        <h2 data-step="08">Workflow quotidien</h2>
+                        <p>Pour mettre à jour le site après une modification :</p>
+                        <pre data-lang="bash"><code># Voir les fichiers modifiés
+git status
+
+# Stager les modifs
+git add .
+
+# Commit avec message descriptif
+git commit -m "Update : nouveau projet VPN"
+
+# Envoyer sur GitHub
+git push</code></pre>
+                        <p>
+                            Dès que le push est effectué, GitHub Actions déploie automatiquement la
+                            nouvelle version. Le site est mis à jour en 30 secondes à 2 minutes.
+                        </p>
+                        <div class="callout">
+                            <span class="icon">✅</span>
+                            <p>Le site est désormais en production. Chaque push déclenche un nouveau déploiement visible dans l'onglet <strong>Actions</strong> du repo.</p>
+                        </div>
+                    </section>
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <footer>
+        <span>© 2026 Alienis SAHIN</span>
+        <span class="sep">/</span>
+        <span>Portfolio BTS SIO SISR</span>
+        <span class="sep">/</span>
+        <span>Caen · Normandie</span>
+    </footer>
+
+    <script src="app.js"></script>
+</body>
+</html>

@@ -1,0 +1,343 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Infrastructure alienis.lan | Alienis SAHIN</title>
+    <meta name="description" content="Procédure complète : déploiement d'une infrastructure d'entreprise Windows Server avec AD, GPO et DHCP.">
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <nav>
+        <div class="nav-container">
+            <a href="index.html" class="logo">alienis<span class="suffix">.sh</span></a>
+            <button class="hamburger" id="hamburger-btn" aria-label="Menu"><span></span><span></span><span></span></button>
+            <ul class="nav-links" id="nav-links">
+                <li><a href="index.html">accueil</a></li>
+                <li><a href="parcours.html">parcours</a></li>
+                <li><a href="competences.html">competences</a></li>
+                <li><a href="procedures.html">procedures</a></li>
+                <li><a href="projets.html" class="active">projets</a></li>
+                <li><a href="synthese-e5.html">synthèse E5</a></li>
+                <li><a href="contact.html">contact</a></li>
+            </ul>
+        </div>
+    </nav>
+    <div class="nav-overlay" id="nav-overlay"></div>
+
+    <main>
+        <div class="container">
+            <a href="projets.html" class="back-link">← retour aux projets</a>
+
+            <section class="section-header animate-in">
+                <span class="label">Projet phare</span>
+                <h1>Infrastructure alienis.lan</h1>
+                <p class="subtitle">
+                    Déploiement complet d'une infrastructure d'entreprise sur Windows Server : Active
+                    Directory, OU, utilisateurs, PC, GPO de sécurité, autorité de certification, DHCP
+                    et adressage IP.
+                </p>
+            </section>
+
+            <div class="procedure-meta animate-in delay-1">
+                <div class="meta-item">
+                    <span class="meta-label">Environnement</span>
+                    <span class="meta-value">Windows Server 2022</span>
+                </div>
+                <div class="meta-item">
+                    <span class="meta-label">Domaine</span>
+                    <span class="meta-value">alienis.lan</span>
+                </div>
+                <div class="meta-item">
+                    <span class="meta-label">Durée</span>
+                    <span class="meta-value">~4 heures</span>
+                </div>
+                <div class="meta-item">
+                    <span class="meta-label">Niveau</span>
+                    <span class="meta-value">Intermédiaire</span>
+                </div>
+            </div>
+
+            <div class="procedure-layout">
+                <aside class="toc">
+                    <div class="toc-title">Sommaire</div>
+                    <ol>
+                        <li><a href="#objectif">Objectif du projet</a></li>
+                        <li><a href="#prerequis">Prérequis</a></li>
+                        <li><a href="#ip-serveur">Paramétrage IP du serveur</a></li>
+                        <li><a href="#ad-ds">Installation AD DS &amp; domaine</a></li>
+                        <li><a href="#ou">Création de l'OU Société</a></li>
+                        <li><a href="#users">Création des utilisateurs</a></li>
+                        <li><a href="#pc">Ajout des postes clients</a></li>
+                        <li><a href="#dhcp">Configuration du DHCP</a></li>
+                        <li><a href="#gpo-cert">GPO Autorité de certification</a></li>
+                        <li><a href="#gpo-taskmgr">GPO Restriction gestionnaire</a></li>
+                        <li><a href="#verif">Vérifications finales</a></li>
+                    </ol>
+                </aside>
+
+                <div class="procedure-content">
+                    <section id="objectif">
+                        <h2 data-step="01">Objectif du projet</h2>
+                        <p>
+                            Déployer une infrastructure réseau d'entreprise complète sur Windows Server.
+                            Cette infrastructure doit permettre :
+                        </p>
+                        <ul>
+                            <li>L'authentification centralisée des utilisateurs via <strong>Active Directory</strong></li>
+                            <li>L'organisation logique de la société par <strong>Unités d'Organisation (OU)</strong></li>
+                            <li>La distribution automatique des adresses IP via <strong>DHCP</strong></li>
+                            <li>L'application de <strong>stratégies de groupe (GPO)</strong> de sécurité</li>
+                            <li>Le chiffrement des communications par <strong>certificats</strong></li>
+                        </ul>
+                    </section>
+
+                    <section id="prerequis">
+                        <h2 data-step="02">Prérequis</h2>
+                        <table>
+                            <thead>
+                                <tr><th>Composant</th><th>Spécification</th></tr>
+                            </thead>
+                            <tbody>
+                                <tr><td>Hyperviseur</td><td>VMware Workstation / Hyper-V / Proxmox</td></tr>
+                                <tr><td>OS Serveur</td><td>Windows Server 2022 (avec Desktop Experience)</td></tr>
+                                <tr><td>OS Client</td><td>Windows 10 / 11 Pro</td></tr>
+                                <tr><td>RAM minimale</td><td>4 Go serveur + 2 Go par client</td></tr>
+                                <tr><td>Réseau virtuel</td><td>Isolé (VMnet / Internal Switch)</td></tr>
+                            </tbody>
+                        </table>
+                    </section>
+
+                    <section id="ip-serveur">
+                        <h2 data-step="03">Paramétrage IP du serveur</h2>
+                        <p>
+                            Un contrôleur de domaine doit <strong>obligatoirement</strong> avoir une IP
+                            statique. Si l'IP change, les clients ne trouveront plus le DC.
+                        </p>
+                        <h3>Configuration statique</h3>
+                        <ul>
+                            <li><code>Panneau de configuration</code> → <code>Centre Réseau et partage</code></li>
+                            <li>Clic droit sur la carte réseau → <code>Propriétés</code></li>
+                            <li>Sélectionner <code>IPv4</code> → <code>Propriétés</code></li>
+                        </ul>
+                        <pre data-lang="Configuration IP"><code>Adresse IP       : 10.0.0.10
+Masque           : 255.255.255.0
+Passerelle       : 10.0.0.254
+DNS primaire     : 127.0.0.1   (le serveur est son propre DNS)</code></pre>
+                        <div class="callout callout-tip">
+                            <span class="icon">💡</span>
+                            <p>Renommer le serveur avant la promotion en DC (ex : <code>SRV-AD01</code>) car changer le nom après implique de re-promouvoir le serveur.</p>
+                        </div>
+                    </section>
+
+                    <section id="ad-ds">
+                        <h2 data-step="04">Installation AD DS &amp; création du domaine</h2>
+                        <h3>Étape 1 — Ajouter le rôle</h3>
+                        <ul>
+                            <li>Ouvrir <code>Gestionnaire de serveur</code></li>
+                            <li><code>Gérer</code> → <code>Ajouter des rôles et fonctionnalités</code></li>
+                            <li>Cocher <strong>Services AD DS</strong> + <strong>Serveur DNS</strong></li>
+                            <li>Valider et attendre la fin de l'installation</li>
+                        </ul>
+
+                        <h3>Étape 2 — Promotion en contrôleur de domaine</h3>
+                        <ul>
+                            <li>Cliquer sur le drapeau ⚑ en haut à droite → <strong>Promouvoir ce serveur en contrôleur de domaine</strong></li>
+                            <li>Choisir <strong>Ajouter une nouvelle forêt</strong></li>
+                            <li>Nom de domaine racine : <code>alienis.lan</code></li>
+                            <li>Niveau fonctionnel : Windows Server 2016 ou plus</li>
+                            <li>Mot de passe DSRM : à conserver précieusement</li>
+                            <li>Laisser par défaut le reste → <strong>Installer</strong></li>
+                        </ul>
+                        <div class="callout callout-warn">
+                            <span class="icon">⚠️</span>
+                            <p>Le serveur va redémarrer automatiquement après la promotion. La connexion se fait désormais en <code>ALIENIS\Administrateur</code>.</p>
+                        </div>
+                    </section>
+
+                    <section id="ou">
+                        <h2 data-step="05">Création de l'OU Société</h2>
+                        <p>
+                            Les Unités d'Organisation (OU) structurent l'annuaire et permettent d'appliquer
+                            des GPO de façon ciblée.
+                        </p>
+                        <ul>
+                            <li>Ouvrir <code>Utilisateurs et ordinateurs Active Directory</code></li>
+                            <li>Clic droit sur le domaine <code>alienis.lan</code> → <code>Nouveau</code> → <code>Unité d'organisation</code></li>
+                            <li>Nom : <strong>SOCIÉTÉ</strong></li>
+                            <li>Cocher <strong>Protéger de la suppression accidentelle</strong></li>
+                        </ul>
+                        <h3>Sous-OU à créer dans SOCIÉTÉ</h3>
+                        <ul>
+                            <li><code>Utilisateurs</code> — comptes des employés</li>
+                            <li><code>Ordinateurs</code> — postes de travail du domaine</li>
+                            <li><code>Groupes</code> — groupes de sécurité</li>
+                            <li><code>Services</code> — comptes de service</li>
+                        </ul>
+                    </section>
+
+                    <section id="users">
+                        <h2 data-step="06">Création des utilisateurs</h2>
+                        <p>
+                            Dans l'OU <code>SOCIÉTÉ &gt; Utilisateurs</code>, clic droit → <code>Nouveau</code> → <code>Utilisateur</code>.
+                        </p>
+                        <table>
+                            <thead>
+                                <tr><th>Nom complet</th><th>Login</th><th>Rôle</th></tr>
+                            </thead>
+                            <tbody>
+                                <tr><td>Jean Dupont</td><td>j.dupont</td><td>Comptabilité</td></tr>
+                                <tr><td>Marie Martin</td><td>m.martin</td><td>Direction</td></tr>
+                                <tr><td>Paul Durand</td><td>p.durand</td><td>Commercial</td></tr>
+                            </tbody>
+                        </table>
+                        <div class="callout">
+                            <span class="icon">🔑</span>
+                            <p>Cocher <strong>L'utilisateur doit changer de mot de passe à la prochaine ouverture</strong> pour la sécurité. Décocher <strong>Le mot de passe n'expire jamais</strong>.</p>
+                        </div>
+                    </section>
+
+                    <section id="pc">
+                        <h2 data-step="07">Ajout des postes clients au domaine</h2>
+                        <p>Sur le poste <strong>client</strong> (Windows 10/11 Pro) :</p>
+                        <h3>Étape 1 — Configurer l'IP du client</h3>
+                        <pre data-lang="Config client"><code>Adresse IP    : 10.0.0.50
+Masque        : 255.255.255.0
+Passerelle    : 10.0.0.254
+DNS primaire  : 10.0.0.10   (IP du serveur AD)</code></pre>
+
+                        <h3>Étape 2 — Vérifier la connectivité</h3>
+                        <pre data-lang="cmd"><code>ping alienis.lan
+nslookup alienis.lan</code></pre>
+
+                        <h3>Étape 3 — Rejoindre le domaine</h3>
+                        <ul>
+                            <li><code>Paramètres</code> → <code>Système</code> → <code>À propos</code></li>
+                            <li><code>Renommer ce PC (avancé)</code> → onglet <code>Nom de l'ordinateur</code> → <code>Modifier</code></li>
+                            <li>Cocher <strong>Domaine</strong> → saisir <code>alienis.lan</code></li>
+                            <li>Authentification avec un compte Administrateur du domaine</li>
+                            <li>Redémarrer le PC</li>
+                        </ul>
+                    </section>
+
+                    <section id="dhcp">
+                        <h2 data-step="08">Configuration du DHCP &amp; bail</h2>
+                        <h3>Étape 1 — Ajouter le rôle DHCP</h3>
+                        <ul>
+                            <li><code>Gestionnaire de serveur</code> → <code>Ajouter des rôles</code> → <strong>Serveur DHCP</strong></li>
+                            <li>Après installation, cliquer sur le drapeau → <strong>Terminer la configuration DHCP</strong></li>
+                            <li>Autoriser avec le compte Administrateur du domaine</li>
+                        </ul>
+
+                        <h3>Étape 2 — Créer une étendue IPv4</h3>
+                        <ul>
+                            <li>Ouvrir la console <code>DHCP</code></li>
+                            <li>Déplier le serveur → clic droit sur <code>IPv4</code> → <strong>Nouvelle étendue</strong></li>
+                        </ul>
+                        <table>
+                            <thead>
+                                <tr><th>Paramètre</th><th>Valeur</th></tr>
+                            </thead>
+                            <tbody>
+                                <tr><td>Nom de l'étendue</td><td>LAN-SOCIÉTÉ</td></tr>
+                                <tr><td>Plage d'adresses</td><td>10.0.0.100 → 10.0.0.200</td></tr>
+                                <tr><td>Masque</td><td>255.255.255.0 (/24)</td></tr>
+                                <tr><td>Exclusions</td><td>10.0.0.100 → 10.0.0.110 (réservées)</td></tr>
+                                <tr><td>Durée du bail</td><td>8 jours</td></tr>
+                                <tr><td>Passerelle (option 003)</td><td>10.0.0.254</td></tr>
+                                <tr><td>Serveur DNS (option 006)</td><td>10.0.0.10</td></tr>
+                                <tr><td>Domaine (option 015)</td><td>alienis.lan</td></tr>
+                            </tbody>
+                        </table>
+                        <div class="callout callout-tip">
+                            <span class="icon">💡</span>
+                            <p>Pour réserver une IP fixe à un poste, récupérer son adresse MAC via <code>ipconfig /all</code> puis dans <code>DHCP &gt; Réservations</code>, clic droit → <strong>Nouvelle réservation</strong>.</p>
+                        </div>
+                    </section>
+
+                    <section id="gpo-cert">
+                        <h2 data-step="09">GPO Autorité de certification</h2>
+                        <p>
+                            Cette GPO permet de déployer un certificat d'autorité racine sur tous les postes
+                            du domaine, indispensable pour les communications chiffrées (SMB signing, HTTPS interne).
+                        </p>
+                        <h3>Étape 1 — Installer AD CS</h3>
+                        <ul>
+                            <li>Ajouter le rôle <strong>Services de certificats Active Directory</strong></li>
+                            <li>Configurer l'AC comme <strong>AC racine d'entreprise</strong></li>
+                            <li>Validité : 10 ans</li>
+                        </ul>
+                        <h3>Étape 2 — Créer la GPO</h3>
+                        <ul>
+                            <li>Ouvrir <code>Gestion des stratégies de groupe</code></li>
+                            <li>Créer un dossier <strong>SOCIÉTÉ</strong> → clic droit → <strong>Créer un objet GPO</strong></li>
+                            <li>Nommer : <code>GPO-Certificats-AC</code></li>
+                            <li>Modifier → <code>Configuration ordinateur</code> → <code>Stratégies</code> → <code>Paramètres Windows</code> → <code>Paramètres de sécurité</code> → <code>Stratégies de clé publique</code></li>
+                            <li>Importer le certificat de l'AC racine</li>
+                        </ul>
+                        <h3>Étape 3 — Lier la GPO</h3>
+                        <pre data-lang="cmd"><code>gpupdate /force
+certutil -pulse</code></pre>
+                    </section>
+
+                    <section id="gpo-taskmgr">
+                        <h2 data-step="10">GPO — Désactiver le gestionnaire des tâches</h2>
+                        <p>
+                            Empêcher les utilisateurs standards de fermer des processus critiques du poste.
+                        </p>
+                        <h3>Création de la GPO</h3>
+                        <ul>
+                            <li>Dans <code>Gestion des stratégies de groupe</code></li>
+                            <li>Clic droit sur l'OU <code>SOCIÉTÉ &gt; Utilisateurs</code> → <strong>Créer un objet GPO dans ce domaine, et le lier ici</strong></li>
+                            <li>Nommer : <code>GPO-Restriction-TaskMgr</code></li>
+                        </ul>
+                        <h3>Paramétrage</h3>
+                        <p>Modifier → <code>Configuration utilisateur</code> → <code>Modèles d'administration</code> → <code>Système</code> → <code>Options Ctrl+Alt+Suppr</code></p>
+                        <ul>
+                            <li>Activer : <strong>Supprimer le Gestionnaire des tâches</strong></li>
+                        </ul>
+                        <pre data-lang="cmd"><code>gpupdate /force</code></pre>
+                        <div class="callout callout-warn">
+                            <span class="icon">⚠️</span>
+                            <p>Bien cibler l'OU des <strong>utilisateurs</strong> et non celle des administrateurs, sinon les admins du domaine seront également bloqués.</p>
+                        </div>
+                    </section>
+
+                    <section id="verif">
+                        <h2 data-step="11">Vérifications finales</h2>
+                        <h3>Tests à effectuer</h3>
+                        <ul>
+                            <li>✅ Un client peut s'authentifier avec un compte AD</li>
+                            <li>✅ Le client reçoit bien une IP du DHCP (vérifier dans les baux côté serveur)</li>
+                            <li>✅ Le client résout <code>alienis.lan</code> (<code>nslookup alienis.lan</code>)</li>
+                            <li>✅ Le certificat d'AC est présent dans le magasin du client</li>
+                            <li>✅ Le Gestionnaire des tâches est bien bloqué pour les users standards</li>
+                            <li>✅ Les admins ont toujours accès au Gestionnaire</li>
+                        </ul>
+                        <h3>Commandes utiles pour l'audit</h3>
+                        <pre data-lang="PowerShell"><code>Get-ADUser -Filter * | Select Name, SamAccountName
+Get-ADComputer -Filter * | Select Name, OperatingSystem
+Get-DhcpServerv4Lease -ScopeId 10.0.0.0
+Get-GPO -All | Select DisplayName, GpoStatus</code></pre>
+
+                        <div class="callout">
+                            <span class="icon">🎓</span>
+                            <p>Ce projet couvre les compétences SISR <strong>B1.1 (Gérer le patrimoine informatique)</strong>, <strong>B1.2 (Répondre aux incidents et aux demandes d'assistance)</strong> et <strong>B2.1 (Concevoir une solution d'infrastructure)</strong>.</p>
+                        </div>
+                    </section>
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <footer>
+        <span>© 2026 Alienis SAHIN</span>
+        <span class="sep">/</span>
+        <span>Portfolio BTS SIO SISR</span>
+        <span class="sep">/</span>
+        <span>Caen · Normandie</span>
+    </footer>
+
+    <script src="app.js"></script>
+</body>
+</html>

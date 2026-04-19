@@ -1,0 +1,523 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Projets | Alienis SAHIN</title>
+    <meta name="description" content="Projets techniques réalisés par Alienis SAHIN en BTS SIO SISR.">
+    <link rel="stylesheet" href="style.css">
+    <style>
+        /* Projets en tuiles compactes */
+        .projects-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+            gap: 1rem;
+            margin-top: 1.5rem;
+        }
+        .project-tile {
+            padding: 1.2rem 1.3rem;
+            background: var(--bg-card);
+            border: 1px solid var(--border);
+            border-radius: var(--radius-lg);
+            transition: all var(--t-med);
+            display: flex;
+            flex-direction: column;
+            gap: 0.4rem;
+            text-decoration: none;
+            color: inherit;
+            position: relative;
+            overflow: hidden;
+        }
+        .project-tile::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 3px;
+            height: 0;
+            background: linear-gradient(180deg, var(--violet-light), var(--magenta));
+            transition: height var(--t-med);
+        }
+        .project-tile:hover {
+            border-color: var(--violet-light);
+            background: var(--bg-card-hover);
+            transform: translateY(-2px);
+        }
+        .project-tile:hover::before { height: 100%; }
+        .project-tile .proj-num {
+            font-family: var(--font-mono);
+            font-size: 0.7rem;
+            color: var(--violet-light);
+            text-transform: uppercase;
+            letter-spacing: 0.1em;
+        }
+        .project-tile h4 {
+            color: var(--text-0);
+            font-size: 0.98rem;
+            line-height: 1.35;
+            margin-bottom: 0.15rem;
+        }
+        .project-tile p {
+            font-size: 0.82rem;
+            color: var(--text-2);
+            margin-bottom: 0.5rem;
+            line-height: 1.5;
+        }
+        .project-tile .mini-tags {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 0.3rem;
+            margin-top: auto;
+        }
+        .project-tile .mini-tag {
+            font-family: var(--font-mono);
+            font-size: 0.66rem;
+            color: var(--violet-glow);
+            background: rgba(124, 58, 237, 0.1);
+            padding: 0.15rem 0.45rem;
+            border-radius: 3px;
+            border: 1px solid rgba(167, 139, 250, 0.15);
+        }
+        .project-tile.no-link { cursor: default; }
+        .project-tile.no-link:hover { transform: none; }
+
+        /* Tableau de synthèse */
+        .synth-section {
+            margin-top: 4rem;
+            padding-top: 3rem;
+            border-top: 1px dashed var(--border);
+        }
+        .synth-toolbar {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 1rem;
+            align-items: center;
+            justify-content: space-between;
+            margin-bottom: 1.5rem;
+        }
+        .synth-wrap {
+            overflow-x: auto;
+            border: 1px solid var(--border);
+            border-radius: var(--radius-lg);
+            background: var(--bg-card);
+        }
+        table.synth {
+            width: 100%;
+            min-width: 780px;
+            border-collapse: collapse;
+            font-size: 0.82rem;
+        }
+        table.synth thead th {
+            background: rgba(76, 29, 149, 0.35);
+            color: var(--violet-glow);
+            font-family: var(--font-mono);
+            font-size: 0.7rem;
+            text-transform: uppercase;
+            letter-spacing: 0.08em;
+            padding: 0.75rem 0.6rem;
+            text-align: center;
+            vertical-align: bottom;
+            border-bottom: 1px solid var(--border-strong);
+            font-weight: 600;
+        }
+        table.synth thead th.first-col {
+            text-align: left;
+            min-width: 260px;
+        }
+        table.synth tbody td {
+            padding: 0.65rem 0.6rem;
+            border-bottom: 1px solid var(--border);
+            vertical-align: middle;
+            text-align: center;
+            color: var(--text-2);
+        }
+        table.synth tbody td:first-child {
+            text-align: left;
+            color: var(--text-0);
+            font-weight: 500;
+            font-size: 0.85rem;
+        }
+        table.synth tbody tr:hover td {
+            background: rgba(124, 58, 237, 0.06);
+        }
+        table.synth tbody tr.section-row td {
+            background: rgba(124, 58, 237, 0.15);
+            color: var(--violet-glow);
+            font-family: var(--font-mono);
+            font-size: 0.7rem;
+            text-transform: uppercase;
+            letter-spacing: 0.1em;
+            text-align: left;
+            font-weight: 600;
+            padding: 0.5rem 0.8rem;
+        }
+        .cross {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            width: 22px;
+            height: 22px;
+            border-radius: 50%;
+            background: linear-gradient(135deg, var(--violet), var(--magenta));
+            color: white;
+            font-size: 0.72rem;
+            font-weight: 700;
+            box-shadow: 0 0 10px rgba(139, 92, 246, 0.45);
+        }
+        .synth-legend {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 1rem;
+            margin-top: 1rem;
+            padding: 1rem 1.2rem;
+            background: var(--bg-card);
+            border: 1px solid var(--border);
+            border-radius: var(--radius-lg);
+            font-family: var(--font-mono);
+            font-size: 0.78rem;
+            color: var(--text-2);
+        }
+        .synth-legend .item {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+        @media (max-width: 640px) {
+            .synth-toolbar { flex-direction: column; align-items: flex-start; }
+        }
+    </style>
+</head>
+<body>
+    <nav>
+        <div class="nav-container">
+            <a href="index.html" class="logo">alienis<span class="suffix">.sh</span></a>
+            <button class="hamburger" id="hamburger-btn" aria-label="Menu"><span></span><span></span><span></span></button>
+            <ul class="nav-links" id="nav-links">
+                <li><a href="index.html">accueil</a></li>
+                <li><a href="parcours.html">parcours</a></li>
+                <li><a href="competences.html">competences</a></li>
+                <li><a href="procedures.html">procedures</a></li>
+                <li><a href="projets.html" class="active">projets</a></li>
+                <li><a href="synthese-e5.html">synthèse E5</a></li>
+                <li><a href="contact.html">contact</a></li>
+            </ul>
+        </div>
+    </nav>
+    <div class="nav-overlay" id="nav-overlay"></div>
+
+    <main>
+        <div class="container">
+            <section class="section-header animate-in">
+                <span class="label">Réalisations</span>
+                <h1>Mes Projets</h1>
+                <p class="subtitle">
+                    L'ensemble des projets et réalisations effectués durant ma formation.
+                    Cliquez sur une tuile pour consulter la procédure détaillée.
+                </p>
+            </section>
+
+            <div class="projects-grid">
+                <a href="projet-github-pages.html" class="project-tile">
+                    <span class="proj-num">▸ projet 01 — web</span>
+                    <h4>Mise en ligne d'un site via GitHub Pages</h4>
+                    <p>Hébergement gratuit d'un site statique avec déploiement automatique.</p>
+                    <div class="mini-tags">
+                        <span class="mini-tag">Git</span>
+                        <span class="mini-tag">GitHub</span>
+                        <span class="mini-tag">DNS</span>
+                    </div>
+                </a>
+
+                <a href="projet-docker-apache.html" class="project-tile">
+                    <span class="proj-num">▸ projet 02 — devops</span>
+                    <h4>Docker Apache2 + docker-compose</h4>
+                    <p>Conteneurisation et workflow Git complet pour héberger un site web.</p>
+                    <div class="mini-tags">
+                        <span class="mini-tag">Docker</span>
+                        <span class="mini-tag">Apache2</span>
+                        <span class="mini-tag">SSH</span>
+                    </div>
+                </a>
+
+                <a href="#" class="project-tile no-link" title="Procédure à venir">
+                    <span class="proj-num">▸ projet 03 — web</span>
+                    <h4>Mise en ligne d'un site WordPress via GitHub</h4>
+                    <p>Publication d'un site WordPress hébergé sur GitHub.</p>
+                    <div class="mini-tags">
+                        <span class="mini-tag">WordPress</span>
+                        <span class="mini-tag">MySQL</span>
+                        <span class="mini-tag">GitHub</span>
+                    </div>
+                </a>
+
+                <a href="projet-ssh-keys.html" class="project-tile">
+                    <span class="proj-num">▸ projet 04 — sécurité</span>
+                    <h4>Configuration SSH par clé publique</h4>
+                    <p>Génération et dépôt de clés SSH Windows → VM Debian.</p>
+                    <div class="mini-tags">
+                        <span class="mini-tag">SSH</span>
+                        <span class="mini-tag">ssh-keygen</span>
+                        <span class="mini-tag">Linux</span>
+                    </div>
+                </a>
+
+                <a href="#" class="project-tile no-link" title="Procédure à venir">
+                    <span class="proj-num">▸ projet 05 — système</span>
+                    <h4>Déploiement Windows Server + Client en VM</h4>
+                    <p>Installation et paramétrage de machines virtuelles Windows.</p>
+                    <div class="mini-tags">
+                        <span class="mini-tag">Windows Server</span>
+                        <span class="mini-tag">VM</span>
+                    </div>
+                </a>
+
+                <a href="projet-active-directory.html" class="project-tile">
+                    <span class="proj-num">▸ projet 06 — infrastructure</span>
+                    <h4>Création d'un Active Directory</h4>
+                    <p>AD DS, promotion DC, domaine alienis.lan, jointure d'un poste client.</p>
+                    <div class="mini-tags">
+                        <span class="mini-tag">AD DS</span>
+                        <span class="mini-tag">DNS</span>
+                        <span class="mini-tag">Domaine</span>
+                    </div>
+                </a>
+
+                <a href="projet-dhcp.html" class="project-tile">
+                    <span class="proj-num">▸ projet 07 — réseau</span>
+                    <h4>Mise en place du DHCP IPv4</h4>
+                    <p>Configuration d'un serveur DHCP Windows Server, étendue, baux.</p>
+                    <div class="mini-tags">
+                        <span class="mini-tag">DHCP</span>
+                        <span class="mini-tag">Bail</span>
+                        <span class="mini-tag">IPv4</span>
+                    </div>
+                </a>
+
+                <a href="#" class="project-tile no-link" title="Procédure à venir">
+                    <span class="proj-num">▸ projet 08 — sécurité AD</span>
+                    <h4>Ajout et configuration de GPO</h4>
+                    <p>Stratégies de groupe : autorité de certification, SMB, restrictions users.</p>
+                    <div class="mini-tags">
+                        <span class="mini-tag">GPO</span>
+                        <span class="mini-tag">Certificats</span>
+                        <span class="mini-tag">Sécurité</span>
+                    </div>
+                </a>
+
+                <a href="projet-vpn.html" class="project-tile">
+                    <span class="proj-num">▸ projet 09 — sécurité</span>
+                    <h4>VPN WireGuard sur Proxmox (école)</h4>
+                    <p>Connexion VPN sécurisée au serveur Proxmox de l'école.</p>
+                    <div class="mini-tags">
+                        <span class="mini-tag">WireGuard</span>
+                        <span class="mini-tag">Proxmox</span>
+                        <span class="mini-tag">Tunnel</span>
+                    </div>
+                </a>
+
+                <a href="projet-societe-alienis.html" class="project-tile">
+                    <span class="proj-num">▸ projet 10 — projet phare</span>
+                    <h4>Infrastructure société alienis.lan</h4>
+                    <p>AD + DHCP + GPO + OU + utilisateurs + PCs + certificats, de A à Z.</p>
+                    <div class="mini-tags">
+                        <span class="mini-tag">AD</span>
+                        <span class="mini-tag">GPO</span>
+                        <span class="mini-tag">DHCP</span>
+                    </div>
+                </a>
+
+                <a href="#" class="project-tile no-link" title="Projet de groupe">
+                    <span class="proj-num">▸ projet 11 — projet de groupe</span>
+                    <h4>LAN Party</h4>
+                    <p>Organisation d'un événement LAN en équipe : planification, réseau, support.</p>
+                    <div class="mini-tags">
+                        <span class="mini-tag">Mode projet</span>
+                        <span class="mini-tag">Réseau</span>
+                        <span class="mini-tag">Équipe</span>
+                    </div>
+                </a>
+
+                <a href="projet-github-pages.html" class="project-tile">
+                    <span class="proj-num">▸ projet 12 — identité pro</span>
+                    <h4>Portfolio GitHub</h4>
+                    <p>Conception et mise en ligne de ce portfolio, identité numérique pro.</p>
+                    <div class="mini-tags">
+                        <span class="mini-tag">HTML/CSS</span>
+                        <span class="mini-tag">GitHub Pages</span>
+                        <span class="mini-tag">Design</span>
+                    </div>
+                </a>
+
+                <a href="#" class="project-tile no-link" title="Projet collaboratif">
+                    <span class="proj-num">▸ projet 13 — groupe · IA</span>
+                    <h4>GDF IA — Gestionnaire de fichiers</h4>
+                    <p>Gestionnaire de fichiers local avec recherche intelligente via Ollama.</p>
+                    <div class="mini-tags">
+                        <span class="mini-tag">Ollama</span>
+                        <span class="mini-tag">IA locale</span>
+                        <span class="mini-tag">UI</span>
+                    </div>
+                </a>
+
+                <a href="projet-autopage.html" class="project-tile">
+                    <span class="proj-num">▸ projet 14 — automatisation</span>
+                    <h4>AutoPage — Notion → Portfolio</h4>
+                    <p>Pipeline n8n + Ollama + Docker pour générer des pages HTML depuis Notion.</p>
+                    <div class="mini-tags">
+                        <span class="mini-tag">n8n</span>
+                        <span class="mini-tag">Ollama</span>
+                        <span class="mini-tag">Docker</span>
+                    </div>
+                </a>
+            </div>
+
+            <!-- ===== TABLEAU DE SYNTHÈSE ===== -->
+            <section class="synth-section animate-in">
+                <span class="label">Épreuve E5</span>
+                <h2>Tableau de synthèse des réalisations</h2>
+                <p class="subtitle" style="margin-bottom: 0;">
+                    Mapping officiel de mes réalisations aux compétences du référentiel SISR.
+                    Chaque croix correspond à une compétence mobilisée et justifiée.
+                </p>
+
+                <div class="synth-toolbar">
+                    <div style="color: var(--text-2); font-family: var(--font-mono); font-size: 0.82rem;">
+                        13 réalisations · 6 compétences · session 2026
+                    </div>
+                    <a href="synthese-e5-alienis.pdf" download class="btn btn-primary">
+                        📄 Télécharger le tableau de synthèse (PDF) <span class="arrow">↓</span>
+                    </a>
+                </div>
+
+                <div class="synth-wrap">
+                    <table class="synth">
+                        <thead>
+                            <tr>
+                                <th class="first-col">Réalisations professionnelles</th>
+                                <th title="Gérer le patrimoine informatique">Patrimoine</th>
+                                <th title="Répondre aux incidents">Incidents</th>
+                                <th title="Développer la présence en ligne">Présence en ligne</th>
+                                <th title="Travailler en mode projet">Mode projet</th>
+                                <th title="Mettre à disposition un service">Service</th>
+                                <th title="Organiser son développement professionnel">Dev pro</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr class="section-row"><td colspan="7">Réalisations en cours de formation</td></tr>
+
+                            <tr>
+                                <td>Déployer des containers sur Docker Compose</td>
+                                <td><span class="cross">✕</span></td><td></td><td></td><td></td>
+                                <td><span class="cross">✕</span></td><td></td>
+                            </tr>
+                            <tr>
+                                <td>Configuration des docker-compose.yml</td>
+                                <td><span class="cross">✕</span></td><td></td><td></td><td></td>
+                                <td><span class="cross">✕</span></td><td></td>
+                            </tr>
+                            <tr>
+                                <td>Mise en ligne d'un site WordPress via GitHub</td>
+                                <td></td><td></td>
+                                <td><span class="cross">✕</span></td><td></td>
+                                <td><span class="cross">✕</span></td><td></td>
+                            </tr>
+                            <tr>
+                                <td>Configuration SSH par clé publique</td>
+                                <td><span class="cross">✕</span></td>
+                                <td><span class="cross">✕</span></td>
+                                <td></td><td></td><td></td><td></td>
+                            </tr>
+                            <tr>
+                                <td>Déploiement de Windows Server et du client en VM</td>
+                                <td><span class="cross">✕</span></td><td></td><td></td><td></td>
+                                <td><span class="cross">✕</span></td><td></td>
+                            </tr>
+                            <tr>
+                                <td>Création d'un Active Directory dans le Windows Server</td>
+                                <td><span class="cross">✕</span></td><td></td><td></td><td></td>
+                                <td><span class="cross">✕</span></td><td></td>
+                            </tr>
+                            <tr>
+                                <td>Mise en place d'un serveur DHCP</td>
+                                <td><span class="cross">✕</span></td>
+                                <td><span class="cross">✕</span></td>
+                                <td></td><td></td>
+                                <td><span class="cross">✕</span></td><td></td>
+                            </tr>
+                            <tr>
+                                <td>Configurer la connexion VPN sur le serveur Proxmox de l'école</td>
+                                <td><span class="cross">✕</span></td><td></td><td></td><td></td>
+                                <td><span class="cross">✕</span></td><td></td>
+                            </tr>
+                            <tr>
+                                <td>Ajout et configuration de GPO</td>
+                                <td><span class="cross">✕</span></td>
+                                <td></td><td></td><td></td><td></td><td></td>
+                            </tr>
+                            <tr>
+                                <td>LAN Party</td>
+                                <td></td><td></td><td></td>
+                                <td><span class="cross">✕</span></td>
+                                <td></td><td></td>
+                            </tr>
+                            <tr>
+                                <td>Portfolio GitHub</td>
+                                <td></td><td></td>
+                                <td><span class="cross">✕</span></td>
+                                <td></td><td></td>
+                                <td><span class="cross">✕</span></td>
+                            </tr>
+                            <tr>
+                                <td>GDF IA — Gestionnaire de fichiers local</td>
+                                <td><span class="cross">✕</span></td>
+                                <td><span class="cross">✕</span></td>
+                                <td></td>
+                                <td><span class="cross">✕</span></td>
+                                <td><span class="cross">✕</span></td>
+                                <td></td>
+                            </tr>
+                            <tr>
+                                <td>AutoPage — Notion vers Portfolio</td>
+                                <td><span class="cross">✕</span></td>
+                                <td><span class="cross">✕</span></td>
+                                <td><span class="cross">✕</span></td>
+                                <td><span class="cross">✕</span></td>
+                                <td><span class="cross">✕</span></td>
+                                <td><span class="cross">✕</span></td>
+                            </tr>
+
+                            <tr class="section-row">
+                                <td colspan="7">Réalisations en milieu professionnel — 1ère année (à compléter)</td>
+                            </tr>
+                            <tr class="section-row">
+                                <td colspan="7">Réalisations en milieu professionnel — 2ème année (à compléter)</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+
+                <div class="synth-legend">
+                    <div class="item">
+                        <span class="cross">✕</span>
+                        <span>Compétence mobilisée et justifiée</span>
+                    </div>
+                    <div class="item">
+                        <span style="font-family: var(--font-mono);">· · ·</span>
+                        <span>Non mobilisée par cette réalisation</span>
+                    </div>
+                </div>
+            </section>
+        </div>
+    </main>
+
+    <footer>
+        <span>© 2026 Alienis SAHIN</span>
+        <span class="sep">/</span>
+        <span>Portfolio BTS SIO SISR</span>
+        <span class="sep">/</span>
+        <span>Caen · Normandie</span>
+    </footer>
+
+    <script src="app.js"></script>
+</body>
+</html>

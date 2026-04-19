@@ -1,0 +1,282 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Mise en place du DHCP IPv4 | Alienis SAHIN</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <nav>
+        <div class="nav-container">
+            <a href="index.html" class="logo">alienis<span class="suffix">.sh</span></a>
+            <button class="hamburger" id="hamburger-btn" aria-label="Menu"><span></span><span></span><span></span></button>
+            <ul class="nav-links" id="nav-links">
+                <li><a href="index.html">accueil</a></li>
+                <li><a href="parcours.html">parcours</a></li>
+                <li><a href="competences.html">competences</a></li>
+                <li><a href="procedures.html">procedures</a></li>
+                <li><a href="projets.html" class="active">projets</a></li>
+                <li><a href="synthese-e5.html">synthèse E5</a></li>
+                <li><a href="contact.html">contact</a></li>
+            </ul>
+        </div>
+    </nav>
+    <div class="nav-overlay" id="nav-overlay"></div>
+
+    <main>
+        <div class="container">
+            <a href="projets.html" class="back-link">← retour aux projets</a>
+
+            <section class="section-header animate-in">
+                <span class="label">Projet 05 — Réseau</span>
+                <h1>Mise en place du DHCP IPv4</h1>
+                <p class="subtitle">
+                    Installation et configuration d'un serveur DHCP sur Windows Server pour distribuer
+                    automatiquement les adresses IP aux postes clients.
+                </p>
+            </section>
+
+            <div class="procedure-meta animate-in delay-1">
+                <div class="meta-item"><span class="meta-label">OS</span><span class="meta-value">Windows Server 2022</span></div>
+                <div class="meta-item"><span class="meta-label">Protocole</span><span class="meta-value">DHCP IPv4</span></div>
+                <div class="meta-item"><span class="meta-label">Durée</span><span class="meta-value">~45 minutes</span></div>
+                <div class="meta-item"><span class="meta-label">Niveau</span><span class="meta-value">Débutant+</span></div>
+            </div>
+
+            <div class="procedure-layout">
+                <aside class="toc">
+                    <div class="toc-title">Sommaire</div>
+                    <ol>
+                        <li><a href="#principe">Principe du DHCP</a></li>
+                        <li><a href="#prerequis">Prérequis</a></li>
+                        <li><a href="#ip-serveur">IP statique du serveur</a></li>
+                        <li><a href="#role">Installation du rôle</a></li>
+                        <li><a href="#autorisation">Autorisation dans AD</a></li>
+                        <li><a href="#etendue">Création de l'étendue</a></li>
+                        <li><a href="#options">Options DHCP</a></li>
+                        <li><a href="#reservation">Réservation par MAC</a></li>
+                        <li><a href="#client">Configuration client</a></li>
+                        <li><a href="#verif">Vérification des baux</a></li>
+                    </ol>
+                </aside>
+
+                <div class="procedure-content">
+                    <section id="principe">
+                        <h2 data-step="01">Principe du DHCP</h2>
+                        <p>
+                            Le <strong>DHCP</strong> (Dynamic Host Configuration Protocol) attribue automatiquement
+                            les paramètres réseau aux machines clientes :
+                        </p>
+                        <ul>
+                            <li>Adresse IP</li>
+                            <li>Masque de sous-réseau</li>
+                            <li>Passerelle par défaut</li>
+                            <li>Serveurs DNS</li>
+                            <li>Nom de domaine</li>
+                        </ul>
+                        <p>
+                            Sans DHCP, un administrateur devrait configurer chaque poste manuellement — impossible
+                            sur un réseau de plusieurs dizaines de machines.
+                        </p>
+                        <h3>Fonctionnement — les 4 étapes DORA</h3>
+                        <ol>
+                            <li><strong>DISCOVER</strong> — le client cherche un serveur DHCP (broadcast)</li>
+                            <li><strong>OFFER</strong> — le serveur propose une adresse</li>
+                            <li><strong>REQUEST</strong> — le client accepte l'offre</li>
+                            <li><strong>ACK</strong> — le serveur confirme et crée le bail</li>
+                        </ol>
+                    </section>
+
+                    <section id="prerequis">
+                        <h2 data-step="02">Prérequis</h2>
+                        <ul>
+                            <li>Windows Server 2022 (ou 2019) installé</li>
+                            <li>IP <strong>statique</strong> configurée sur le serveur</li>
+                            <li>Réseau isolé (pas de box qui ferait déjà du DHCP) — sinon conflit</li>
+                            <li>Idéalement dans un environnement AD déjà opérationnel</li>
+                        </ul>
+                        <div class="callout callout-warn">
+                            <span class="icon">⚠️</span>
+                            <p>Deux serveurs DHCP sur le même réseau physique = chaos garanti. Désactiver impérativement le DHCP de la box si on travaille sur le réseau domestique.</p>
+                        </div>
+                    </section>
+
+                    <section id="ip-serveur">
+                        <h2 data-step="03">IP statique du serveur</h2>
+                        <p>Un serveur DHCP <strong>doit</strong> avoir une IP fixe.</p>
+                        <ul>
+                            <li><code>Paramètres</code> → <code>Réseau et Internet</code> → <code>Paramètres réseau avancés</code></li>
+                            <li>(ou l'ancien <code>Centre Réseau et partage</code> selon la version)</li>
+                            <li>Propriétés de la carte → IPv4 → Propriétés</li>
+                        </ul>
+                        <pre data-lang="Config"><code>Adresse IP    : 10.0.0.10
+Masque        : 255.255.255.0
+Passerelle    : 10.0.0.254
+DNS primaire  : 127.0.0.1</code></pre>
+                    </section>
+
+                    <section id="role">
+                        <h2 data-step="04">Installation du rôle DHCP</h2>
+                        <ul>
+                            <li>Ouvrir le <strong>Gestionnaire de serveur</strong></li>
+                            <li><code>Gérer</code> → <code>Ajouter des rôles et fonctionnalités</code></li>
+                            <li>Type : <strong>Installation basée sur un rôle</strong></li>
+                            <li>Sélectionner le serveur local</li>
+                            <li>Cocher <strong>Serveur DHCP</strong> (accepter les fonctionnalités associées)</li>
+                            <li>Valider et installer</li>
+                        </ul>
+                    </section>
+
+                    <section id="autorisation">
+                        <h2 data-step="05">Autorisation dans Active Directory</h2>
+                        <p>
+                            Dans un environnement AD, un serveur DHCP doit être <strong>autorisé</strong> pour
+                            pouvoir répondre aux requêtes (mesure de sécurité contre les DHCP pirates).
+                        </p>
+                        <ul>
+                            <li>Après l'installation, cliquer sur le drapeau ⚑ en haut du Gestionnaire</li>
+                            <li>Cliquer sur <strong>Terminer la configuration DHCP</strong> (ou <strong>Configurer DHCP</strong> selon la version)</li>
+                            <li>S'authentifier avec un compte <strong>Administrateur du domaine</strong></li>
+                            <li>Créer les groupes de sécurité DHCP (administrateurs, utilisateurs)</li>
+                        </ul>
+                    </section>
+
+                    <section id="etendue">
+                        <h2 data-step="06">Création d'une étendue IPv4</h2>
+                        <ul>
+                            <li>Ouvrir la console <code>DHCP</code> depuis les outils d'administration</li>
+                            <li>Déplier le serveur → clic droit sur <code>IPv4</code> → <strong>Nouvelle étendue</strong></li>
+                        </ul>
+
+                        <h3>Paramétrage de l'étendue</h3>
+                        <table>
+                            <thead><tr><th>Paramètre</th><th>Valeur recommandée</th></tr></thead>
+                            <tbody>
+                                <tr><td>Nom de l'étendue</td><td>LAN-SOCIÉTÉ</td></tr>
+                                <tr><td>Description</td><td>Postes clients du LAN</td></tr>
+                                <tr><td>Adresse IP de début</td><td>10.0.0.100</td></tr>
+                                <tr><td>Adresse IP de fin</td><td>10.0.0.200</td></tr>
+                                <tr><td>Masque</td><td>255.255.255.0 (/24)</td></tr>
+                                <tr><td>Exclusions</td><td>10.0.0.100 → 10.0.0.110 (réservées)</td></tr>
+                                <tr><td>Durée du bail</td><td>8 jours</td></tr>
+                            </tbody>
+                        </table>
+
+                        <div class="callout callout-tip">
+                            <span class="icon">💡</span>
+                            <p>La <strong>plage d'exclusion</strong> empêche le DHCP de distribuer des IP qu'on veut garder pour les serveurs, imprimantes réseau, etc.</p>
+                        </div>
+                    </section>
+
+                    <section id="options">
+                        <h2 data-step="07">Options DHCP (passerelle, DNS)</h2>
+                        <p>Les options indiquent au client quelle passerelle et quel DNS utiliser.</p>
+                        <table>
+                            <thead><tr><th>Code</th><th>Nom</th><th>Valeur</th></tr></thead>
+                            <tbody>
+                                <tr><td>003</td><td>Routeur (passerelle)</td><td>10.0.0.254</td></tr>
+                                <tr><td>006</td><td>Serveurs DNS</td><td>10.0.0.10</td></tr>
+                                <tr><td>015</td><td>Nom de domaine DNS</td><td>alienis.lan</td></tr>
+                                <tr><td>044</td><td>Serveurs WINS (optionnel)</td><td>—</td></tr>
+                            </tbody>
+                        </table>
+                        <p>Pour les activer :</p>
+                        <ul>
+                            <li>Dans la console DHCP → étendue → <code>Options d'étendue</code></li>
+                            <li>Clic droit → <strong>Configurer les options</strong></li>
+                            <li>Cocher et renseigner les options 003, 006, 015</li>
+                        </ul>
+
+                        <p>Activer l'étendue (si ce n'est pas déjà fait) :</p>
+                        <ul>
+                            <li>Clic droit sur l'étendue → <strong>Activer</strong></li>
+                        </ul>
+                    </section>
+
+                    <section id="reservation">
+                        <h2 data-step="08">Réservation d'adresse par MAC</h2>
+                        <p>Pour qu'un poste spécifique reçoive toujours la même IP (imprimante, serveur applicatif…) :</p>
+                        <h3>Étape 1 — Récupérer l'adresse MAC du client</h3>
+                        <pre data-lang="cmd (client)"><code>ipconfig /all</code></pre>
+                        <p>Chercher la ligne <strong>Adresse physique</strong> (format <code>AA-BB-CC-DD-EE-FF</code>).</p>
+
+                        <h3>Étape 2 — Créer la réservation</h3>
+                        <ul>
+                            <li>Dans la console DHCP → étendue → <code>Réservations</code></li>
+                            <li>Clic droit → <strong>Nouvelle réservation</strong></li>
+                            <li>Saisir :
+                                <ul>
+                                    <li>Nom : <code>PC-COMPTA-01</code></li>
+                                    <li>Adresse IP : <code>10.0.0.51</code></li>
+                                    <li>Adresse MAC : <code>AA-BB-CC-DD-EE-FF</code> (ou sans tirets)</li>
+                                    <li>Type : DHCP uniquement</li>
+                                </ul>
+                            </li>
+                        </ul>
+
+                        <div class="callout callout-tip">
+                            <span class="icon">💡</span>
+                            <p>Autre méthode rapide : dans <code>Pool d'adresses</code>, clic droit sur un bail existant → <strong>Ajouter à la réservation</strong>.</p>
+                        </div>
+                    </section>
+
+                    <section id="client">
+                        <h2 data-step="09">Configuration du poste client</h2>
+                        <p>Passer le client en mode automatique :</p>
+                        <ul>
+                            <li>Propriétés de la carte réseau → IPv4 → Propriétés</li>
+                            <li>Cocher <strong>Obtenir une adresse IP automatiquement</strong></li>
+                            <li>Cocher <strong>Obtenir les adresses des serveurs DNS automatiquement</strong></li>
+                        </ul>
+
+                        <p>Forcer une demande de bail :</p>
+                        <pre data-lang="cmd (client)"><code>ipconfig /release
+ipconfig /renew
+ipconfig /all</code></pre>
+                        <p>Vérifier dans la sortie :</p>
+                        <ul>
+                            <li><strong>DHCP activé</strong> : Oui</li>
+                            <li><strong>Serveur DHCP</strong> : 10.0.0.10</li>
+                            <li><strong>Bail obtenu</strong> / <strong>Bail expirant</strong> : dates cohérentes</li>
+                        </ul>
+                    </section>
+
+                    <section id="verif">
+                        <h2 data-step="10">Vérification des baux côté serveur</h2>
+                        <ul>
+                            <li>Console DHCP → étendue → <code>Baux d'adresses</code></li>
+                            <li>Les clients qui ont obtenu une IP apparaissent avec nom, IP, MAC, expiration</li>
+                        </ul>
+
+                        <h3>PowerShell (équivalent rapide)</h3>
+                        <pre data-lang="PowerShell"><code># Lister les baux
+Get-DhcpServerv4Lease -ScopeId 10.0.0.0
+
+# Lister les réservations
+Get-DhcpServerv4Reservation -ScopeId 10.0.0.0
+
+# Statistiques de l'étendue
+Get-DhcpServerv4ScopeStatistics -ScopeId 10.0.0.0</code></pre>
+
+                        <div class="callout">
+                            <span class="icon">✅</span>
+                            <p>Le serveur DHCP est désormais opérationnel. Chaque poste connecté au réseau reçoit automatiquement une IP dans la plage définie, avec passerelle et DNS corrects.</p>
+                        </div>
+                    </section>
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <footer>
+        <span>© 2026 Alienis SAHIN</span>
+        <span class="sep">/</span>
+        <span>Portfolio BTS SIO SISR</span>
+        <span class="sep">/</span>
+        <span>Caen · Normandie</span>
+    </footer>
+
+    <script src="app.js"></script>
+</body>
+</html>

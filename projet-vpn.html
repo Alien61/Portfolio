@@ -1,0 +1,267 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Mise en place d'un VPN WireGuard | Alienis SAHIN</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <nav>
+        <div class="nav-container">
+            <a href="index.html" class="logo">alienis<span class="suffix">.sh</span></a>
+            <button class="hamburger" id="hamburger-btn" aria-label="Menu"><span></span><span></span><span></span></button>
+            <ul class="nav-links" id="nav-links">
+                <li><a href="index.html">accueil</a></li>
+                <li><a href="parcours.html">parcours</a></li>
+                <li><a href="competences.html">competences</a></li>
+                <li><a href="procedures.html">procedures</a></li>
+                <li><a href="projets.html" class="active">projets</a></li>
+                <li><a href="synthese-e5.html">synthèse E5</a></li>
+                <li><a href="contact.html">contact</a></li>
+            </ul>
+        </div>
+    </nav>
+    <div class="nav-overlay" id="nav-overlay"></div>
+
+    <main>
+        <div class="container">
+            <a href="projets.html" class="back-link">← retour aux projets</a>
+
+            <section class="section-header animate-in">
+                <span class="label">Projet 08 — Sécurité</span>
+                <h1>Mise en place d'un VPN WireGuard</h1>
+                <p class="subtitle">
+                    Déployer un VPN WireGuard pour permettre aux télétravailleurs d'accéder de façon
+                    sécurisée au réseau interne de l'entreprise.
+                </p>
+            </section>
+
+            <div class="procedure-meta animate-in delay-1">
+                <div class="meta-item"><span class="meta-label">Solution</span><span class="meta-value">WireGuard</span></div>
+                <div class="meta-item"><span class="meta-label">Serveur</span><span class="meta-value">Debian 12</span></div>
+                <div class="meta-item"><span class="meta-label">Durée</span><span class="meta-value">~1h30</span></div>
+                <div class="meta-item"><span class="meta-label">Port UDP</span><span class="meta-value">51820</span></div>
+            </div>
+
+            <div class="procedure-layout">
+                <aside class="toc">
+                    <div class="toc-title">Sommaire</div>
+                    <ol>
+                        <li><a href="#principe">Principe du VPN</a></li>
+                        <li><a href="#pourquoi-wg">Pourquoi WireGuard</a></li>
+                        <li><a href="#archi">Architecture cible</a></li>
+                        <li><a href="#install">Installation</a></li>
+                        <li><a href="#keys-serveur">Clés côté serveur</a></li>
+                        <li><a href="#conf-serveur">Config wg0.conf serveur</a></li>
+                        <li><a href="#routage">Activer le routage</a></li>
+                        <li><a href="#start">Démarrer le serveur</a></li>
+                        <li><a href="#client">Configuration client</a></li>
+                        <li><a href="#test">Test &amp; vérification</a></li>
+                    </ol>
+                </aside>
+
+                <div class="procedure-content">
+                    <section id="principe">
+                        <h2 data-step="01">Principe d'un VPN</h2>
+                        <p>
+                            Un <strong>VPN</strong> (Virtual Private Network) crée un tunnel chiffré entre un
+                            client distant et un réseau interne. Tout le trafic passe par ce tunnel comme si
+                            le client était physiquement dans le réseau local.
+                        </p>
+                        <p>Cas d'usage typique :</p>
+                        <ul>
+                            <li>Un commercial en télétravail accède aux serveurs internes de l'entreprise</li>
+                            <li>Un admin se connecte depuis chez lui pour maintenir les serveurs</li>
+                            <li>Sécuriser un poste sur un Wi-Fi public (hôtel, aéroport)</li>
+                        </ul>
+                    </section>
+
+                    <section id="pourquoi-wg">
+                        <h2 data-step="02">Pourquoi WireGuard</h2>
+                        <p>Comparé à OpenVPN ou IPsec, WireGuard offre :</p>
+                        <ul>
+                            <li>Un code très réduit (~4000 lignes vs ~600 000 pour OpenVPN) → moins de failles</li>
+                            <li>Des performances supérieures (débit, latence)</li>
+                            <li>Une configuration simple (quelques lignes)</li>
+                            <li>Une cryptographie moderne (Curve25519, ChaCha20, Poly1305)</li>
+                            <li>Intégré nativement au kernel Linux depuis la version 5.6</li>
+                        </ul>
+                    </section>
+
+                    <section id="archi">
+                        <h2 data-step="03">Architecture cible</h2>
+                        <pre data-lang="schéma"><code>┌──────────────┐        Internet       ┌──────────────┐
+│  Client VPN  │ ◄────── chiffré ─────► │ Serveur VPN  │
+│  (laptop)    │      port UDP 51820    │  (Debian)    │
+│ 10.8.0.2/24  │                        │ 10.8.0.1/24  │
+└──────────────┘                        └──────┬───────┘
+                                               │
+                                               ▼
+                                     ┌─────────────────┐
+                                     │ Réseau interne  │
+                                     │  10.0.0.0/24    │
+                                     └─────────────────┘</code></pre>
+                        <p>Plan d'adressage du tunnel :</p>
+                        <ul>
+                            <li>Réseau VPN : <code>10.8.0.0/24</code></li>
+                            <li>Serveur : <code>10.8.0.1</code></li>
+                            <li>Premier client : <code>10.8.0.2</code></li>
+                        </ul>
+                    </section>
+
+                    <section id="install">
+                        <h2 data-step="04">Installation sur le serveur Debian</h2>
+                        <pre data-lang="bash (serveur)"><code>sudo apt update
+sudo apt install wireguard wireguard-tools -y
+
+# Vérifier l'installation
+wg --version</code></pre>
+                    </section>
+
+                    <section id="keys-serveur">
+                        <h2 data-step="05">Génération des clés côté serveur</h2>
+                        <pre data-lang="bash (serveur)"><code>cd /etc/wireguard
+umask 077
+
+# Clé privée du serveur
+wg genkey | tee server_private.key | wg pubkey > server_public.key
+
+# Afficher les deux
+cat server_private.key
+cat server_public.key</code></pre>
+
+                        <div class="callout callout-warn">
+                            <span class="icon">🔐</span>
+                            <p><code>umask 077</code> garantit que les fichiers créés ne soient lisibles que par root. La clé privée ne doit <strong>JAMAIS</strong> être partagée.</p>
+                        </div>
+                    </section>
+
+                    <section id="conf-serveur">
+                        <h2 data-step="06">Fichier de configuration wg0.conf</h2>
+                        <pre data-lang="bash (serveur)"><code>sudo nano /etc/wireguard/wg0.conf</code></pre>
+
+                        <pre data-lang="wg0.conf"><code>[Interface]
+# Adresse du serveur dans le tunnel
+Address = 10.8.0.1/24
+ListenPort = 51820
+PrivateKey = &lt;contenu de server_private.key&gt;
+
+# NAT vers le LAN + activation du forwarding
+PostUp = iptables -A FORWARD -i %i -j ACCEPT
+PostUp = iptables -t nat -A POSTROUTING -o eth0 -j MASQUERADE
+PostDown = iptables -D FORWARD -i %i -j ACCEPT
+PostDown = iptables -t nat -D POSTROUTING -o eth0 -j MASQUERADE
+
+# Premier peer (client) — à compléter après génération des clés client
+[Peer]
+PublicKey = &lt;clé publique du client&gt;
+AllowedIPs = 10.8.0.2/32</code></pre>
+
+                        <div class="callout callout-tip">
+                            <span class="icon">💡</span>
+                            <p>Remplacer <code>eth0</code> par le nom réel de l'interface réseau du serveur (vérifier avec <code>ip a</code>).</p>
+                        </div>
+                    </section>
+
+                    <section id="routage">
+                        <h2 data-step="07">Activer le routage IP sur le serveur</h2>
+                        <p>Pour que le serveur fasse passer le trafic du VPN vers le LAN :</p>
+                        <pre data-lang="bash (serveur)"><code>sudo nano /etc/sysctl.conf</code></pre>
+                        <p>Décommenter ou ajouter :</p>
+                        <pre data-lang="sysctl.conf"><code>net.ipv4.ip_forward=1</code></pre>
+                        <p>Appliquer :</p>
+                        <pre data-lang="bash (serveur)"><code>sudo sysctl -p</code></pre>
+
+                        <h3>Ouvrir le port UDP 51820 sur le firewall</h3>
+                        <pre data-lang="bash (serveur)"><code>sudo ufw allow 51820/udp
+sudo ufw allow ssh   # ne pas se bloquer soi-même !
+sudo ufw enable
+sudo ufw status</code></pre>
+                    </section>
+
+                    <section id="start">
+                        <h2 data-step="08">Démarrer le serveur WireGuard</h2>
+                        <pre data-lang="bash (serveur)"><code># Lancer le tunnel
+sudo wg-quick up wg0
+
+# Activer au démarrage
+sudo systemctl enable wg-quick@wg0
+
+# Vérifier le statut
+sudo wg show</code></pre>
+                    </section>
+
+                    <section id="client">
+                        <h2 data-step="09">Configuration du client (Windows / Linux)</h2>
+                        <p>Installer le client officiel WireGuard : <code>wireguard.com/install</code></p>
+
+                        <h3>Générer les clés du client</h3>
+                        <p>Sur Linux :</p>
+                        <pre data-lang="bash (client)"><code>wg genkey | tee client_private.key | wg pubkey > client_public.key</code></pre>
+                        <p>
+                            Sur Windows, le client graphique génère automatiquement les clés à la création
+                            du tunnel.
+                        </p>
+
+                        <h3>Fichier client.conf</h3>
+                        <pre data-lang="client.conf"><code>[Interface]
+PrivateKey = &lt;clé privée du client&gt;
+Address = 10.8.0.2/24
+DNS = 10.0.0.10
+
+[Peer]
+PublicKey = &lt;clé publique du serveur&gt;
+Endpoint = &lt;IP publique du serveur&gt;:51820
+AllowedIPs = 10.0.0.0/24, 10.8.0.0/24
+PersistentKeepalive = 25</code></pre>
+
+                        <h3>Côté serveur — ajouter la clé publique du client</h3>
+                        <p>Dans <code>/etc/wireguard/wg0.conf</code>, compléter la section <code>[Peer]</code> :</p>
+                        <pre data-lang="wg0.conf"><code>[Peer]
+PublicKey = &lt;clé publique du client&gt;
+AllowedIPs = 10.8.0.2/32</code></pre>
+                        <p>Recharger la configuration :</p>
+                        <pre data-lang="bash (serveur)"><code>sudo wg-quick down wg0
+sudo wg-quick up wg0</code></pre>
+                    </section>
+
+                    <section id="test">
+                        <h2 data-step="10">Test &amp; vérification</h2>
+                        <p>Sur le client, activer le tunnel (bouton <strong>Activate</strong> dans WireGuard GUI).</p>
+
+                        <p>Vérifier la connexion :</p>
+                        <pre data-lang="cmd (client)"><code># Pinger le serveur VPN
+ping 10.8.0.1
+
+# Pinger une machine du LAN de l'entreprise
+ping 10.0.0.10
+
+# Vérifier l'IP publique vue depuis Internet
+curl ifconfig.me</code></pre>
+
+                        <p>Côté serveur :</p>
+                        <pre data-lang="bash (serveur)"><code>sudo wg show</code></pre>
+                        <p>La sortie doit montrer un <code>latest handshake</code> récent et des transferts de données.</p>
+
+                        <div class="callout">
+                            <span class="icon">✅</span>
+                            <p>Le client accède désormais aux ressources internes <code>10.0.0.0/24</code> comme s'il était physiquement dans les locaux, via un tunnel chiffré. Cette procédure répond directement au cas d'usage BTS : <em>"La PME envisage d'utiliser un VPN pour ses télétravailleurs."</em></p>
+                        </div>
+                    </section>
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <footer>
+        <span>© 2026 Alienis SAHIN</span>
+        <span class="sep">/</span>
+        <span>Portfolio BTS SIO SISR</span>
+        <span class="sep">/</span>
+        <span>Caen · Normandie</span>
+    </footer>
+
+    <script src="app.js"></script>
+</body>
+</html>
